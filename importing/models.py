@@ -17,7 +17,7 @@ class Student(models.Model):
     student_id = models.TextField(max_length=20)
     the_class = models.ForeignKey(Class, default=None)
     times_remain_to_clean = models.PositiveSmallIntegerField(default=3)
-    date_to_come = models.TextField(max_length=100, default='')
+    date_to_come = models.TextField(max_length=60, default='[]')
 
 def retreive_to_db(file_name):
     for sheet in structure_data('test.xls'):
@@ -59,7 +59,7 @@ def structure_class(sheet):
         current_row = sheet.row(i)
         for idx in range( len(start_column) ):
             j = start_column[idx]
-            if current_row[j].value != '':
+            if current_row[j+1].value != '':
                 student = Student(id_in_class = int(current_row[j].value),
                                   name = current_row[j+1].value,
                                   student_id = current_row[j+2].value,

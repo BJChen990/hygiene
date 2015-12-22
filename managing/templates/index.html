@@ -19,7 +19,9 @@
         <div class="class-container" data-grade="2"></div>
         <div class="class-container" data-grade="3"></div>
     </header>
-    <section id="result_students" style="padding-bottom:80px; padding-left:15%; padding-right:15%"></section>
+    <section id="result_students" style="padding-bottom:80px; padding-left:15%; padding-right:15%">
+        {{ error }}
+    </section>
     <section id="action_selection" style="background-color:#c7bff5;padding:20px;position: fixed;width: 100%;bottom: 0;">
         <p>增加掃地日期
         <input type="date" id="date-picker">
@@ -84,13 +86,11 @@
             students.forEach(function(value){
                 var fields = value.fields;
                 if ( fields.times_remain_to_clean > 0 ){
-                    var row = $('<tr ></tr>');
+                    var row = $('<tr data-student-id="'+fields.student_id+'"></tr>');
                     row.append( $('<td>'+fields.name+'</td><td>'+fields.student_id+'</td><td>'+fields.times_remain_to_clean+'</td>') );
-                    if (fields.date_to_come ){
-                        JSON.parse(fields.date_to_come).forEach(function(value){
-                            row.append( $('<td>'+value+'</td>'));
-                        });
-                    }
+                    JSON.parse(fields.date_to_come).forEach(function(value){
+                        row.append( $('<td>'+value+'</td>'));
+                    });
                     documentFragment.append(row);
                 }
             });
@@ -105,7 +105,7 @@
         }
 
         function remove_students(grade,number){
-            var dom = (number) ? $('p[data-grade='+grade+'][data-class='+number+']') : $('p[data-grade='+grade+']');
+            var dom = (number) ? $('table[data-grade='+grade+'][data-class='+number+']') : $('table[data-grade='+grade+']');
             var parent = $(dom.parent());
             parent.hide();
             dom.remove();
@@ -114,7 +114,7 @@
 
         $('#submitter').click(function(e){
             var ids = [];
-            $('p[data-student-id]').each(function(_,value){
+            $('tr[data-student-id]').each(function(_,value){
                 ids.push(value.getAttribute('data-student-id'));
             });
             var form = $('<form action="/managing/schedule_date/" method="POST"></form>');
