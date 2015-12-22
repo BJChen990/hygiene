@@ -19,4 +19,5 @@ from django.conf.urls import url, include
 
 urlpatterns = [
     url(r'^importing/', include('importing.urls') ),
+    url(r'^managing/', include('managing.urls') ),
 ]

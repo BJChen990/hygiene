@@ -10,9 +10,9 @@ Function views
     2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
 """
 from django.conf.urls import url
-from importing.views import import_page, upload
+from managing.views import index, request_classes
 
 urlpatterns = [
-    url(r'^$', import_page, name='import'),
-    url(r'^upload/$', upload, name='upload'),
+    url(r'^$', index, name='page'),
+    url(r'^classes/(?P<grade>[1-3])/$', request_classes, name='classes')
 ]

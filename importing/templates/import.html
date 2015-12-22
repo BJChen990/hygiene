@@ -3,7 +3,8 @@
     <title>Import xls page</title>
 </head>
 <body>
-    <form action="importing/update" method="post">
+    <form action="/importing/upload/" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
         <label for="xls_input"></label>
         <input name="xls_file" type="file" id="xls_input">
         <input type="submit">
