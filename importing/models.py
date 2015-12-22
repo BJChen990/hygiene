@@ -1,10 +1,12 @@
 from django.db import models
 import xlrd
+import re
 
 # Create your models here.
 #
 class Class(models.Model):
     grade = models.TextField()
+    number = models.PositiveSmallIntegerField(default=0)
     name = models.TextField(default=None)
     type = models.TextField(max_length=20)
 
@@ -15,7 +17,7 @@ class Student(models.Model):
     student_id = models.TextField(max_length=20)
     the_class = models.ForeignKey(Class, default=None)
     times_remain_to_clean = models.PositiveSmallIntegerField(default=3)
-    date_to_come = models.TextField()
+    date_to_come = models.TextField(max_length=100, default='')
 
 def retreive_to_db(file_name):
     for sheet in structure_data('test.xls'):
@@ -33,18 +35,20 @@ def structure_class(sheet):
     students = []
 
     # Read Class number and name
+    regular_matcher = re.compile('([一二三])年(\d+)班')
     current_row = sheet.row(1)
     tmp_row = sheet.row(0)
     for i in range( len(current_row) ):
         class_name = current_row[i].value
+        match_result = regular_matcher.match(class_name)
         type_name = tmp_row[i].value
         if class_name != '':
-            if '一年' in class_name:
-                current_class = Class(grade=1, name=class_name, type= type_name)
-            elif '二年' in class_name:
-                current_class = Class(grade=2, name=class_name, type= type_name)
-            elif '三年' in class_name:
-                current_class = Class(grade=3, name=class_name, type= type_name)
+            if '一' == match_result.group(1):
+                current_class = Class(grade=1, name=class_name, type= type_name, number=match_result.group(2))
+            elif '二' == match_result.group(1):
+                current_class = Class(grade=2, name=class_name, type= type_name, number=match_result.group(2))
+            elif '三' == match_result.group(1):
+                current_class = Class(grade=3, name=class_name, type= type_name, number=match_result.group(2))
             current_class.save()
             root += [current_class]
             start_column += [i]
