@@ -1,0 +1,105 @@
+<html>
+<head>
+    <title>Manage page</title>
+    {% load staticfiles %}
+    <link rel="stylesheet" href='{% static "css/bootstrap.min.css" %}'>
+</head>
+<body>
+    <header id="class_selection" style="background-color:#c7bff5;padding:20px">
+        <header>
+            <h3>選擇年級</h3>
+            <div class="btn-group" id="grade-group">
+                <button class="btn btn-default" type="button" data-grade="1">一年級</button>
+                <button class="btn btn-default" type="button" data-grade="2">二年級</button>
+                <button class="btn btn-default" type="button" data-grade="3">三年級</button>
+            </div>
+        </header>
+        <h3>選擇班級</h3>
+        <div class="class-container" data-grade="1"  style="padding:10px"></div>
+        <div class="class-container" data-grade="2" style="padding:10px"></div>
+        <div class="class-container" data-grade="3" style="padding:10px"></div>
+    </header>
+    <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
+    </section>
+
+    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
+    <script>
+        $('#grade-group').click(function(e){
+            var grade_dom = $(e.target);
+
+            remove_classes();
+            remove_students();
+
+            request_classes(grade_dom.data('grade'));
+        });
+
+        $('.class-container').click(function(e){
+            var class_dom = $(e.target);
+
+            remove_students();
+            request_students( class_dom.data('grade'),class_dom.data('class') );
+        });
+
+        function request_classes(num){
+            $.getJSON('/managing/classes/'+num ,function(data){ handle_classes(data,num) });
+        }
+
+        function request_students(grade,class_number){
+            $.getJSON('/managing/students/'+grade+'/'+class_number , function(data){ handle_students(data,grade,class_number) });
+        }
+
+        function handle_classes(json,grade){
+            var classes = JSON.parse(json);
+            var documentFragment = $(document.createDocumentFragment());
+
+            classes.forEach(function(value){
+                var fields = value.fields;
+                documentFragment.append( $('<button type="button" class="btn btn-default" \
+                                            data-grade="' + grade +
+                                            '" data-class="'+ fields.number+'" >' +
+                                            fields.name+'\n'+ fields.type+'</button>') );
+            });
+            $('.class-container[data-grade='+ grade +']').append(documentFragment);
+        }
+
+        function handle_students(json,grade,num){
+            var students = JSON.parse(json);
+            var documentFragment = $('<table class="table table-bordered" \
+                                      data-grade="'+grade+'" data-class="'+num+'"></table>');
+            documentFragment.append( $('<caption>'+grade+'年'+num+'班</caption>') );
+            documentFragment.append( $('<thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
+                                        <th>掃地日期一</th><th>掃地日期二</th><th>掃地日期三</th></tr></thead>' ) );
+
+            students.forEach(function(value){
+                var fields = value.fields;
+                if ( fields.times_remain_to_clean > 0 ){
+                    var row = $('<tr data-student-id="'+fields.student_id+'"></tr>');
+                    row.append( $('<td>'+fields.name+'</td><td>'+fields.student_id+'</td><td>'+fields.times_remain_to_clean+'</td>') );
+                    JSON.parse(fields.date_to_come).forEach(function(value){
+
+                        row.append( $('<td>'+value+'</td>'));
+                    });
+                    documentFragment.append(row);
+                }
+            });
+            $('#result_students').append( documentFragment );
+        }
+
+        function remove_classes(){
+            var dom = $('.class-container[data-grade]');
+            dom.hide();
+            dom.empty();
+            dom.show();
+        }
+
+        function remove_students(){
+            var dom = $('table[data-grade]');
+            var parent = $(dom.parent());
+            parent.hide();
+            dom.remove();
+            parent.show();
+        }
+
+    </script>
+</body>
+</html>
