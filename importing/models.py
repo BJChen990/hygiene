@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: big5 -*-
 
 from django.db import models
 from index.models import Class,Student
@@ -23,7 +23,7 @@ def structure_class(sheet):
     students = []
 
     # Read Class number and name
-    regular_matcher = re.compile('([‰∏Ä‰∫å‰∏â])Âπ¥(\d+)Áè≠')
+    regular_matcher = re.compile('([§@§G§T])¶~(\d+)ØZ')
     current_row = sheet.row(1)
     tmp_row = sheet.row(0)
     for i in range( len(current_row) ):
@@ -31,11 +31,11 @@ def structure_class(sheet):
         match_result = regular_matcher.match(class_name)
         type_name = tmp_row[i].value
         if class_name != '':
-            if '‰∏Ä' == match_result.group(1):
+            if '§@' == match_result.group(1):
                 current_class = Class(grade=1, name=class_name, type= type_name, number=match_result.group(2))
-            elif '‰∫å' == match_result.group(1):
+            elif '§G' == match_result.group(1):
                 current_class = Class(grade=2, name=class_name, type= type_name, number=match_result.group(2))
-            elif '‰∏â' == match_result.group(1):
+            elif '§T' == match_result.group(1):
                 current_class = Class(grade=3, name=class_name, type= type_name, number=match_result.group(2))
             current_class.save()
             root += [current_class]

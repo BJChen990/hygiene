@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: big5 -*-
 
 
 from django.http import HttpResponse
@@ -43,9 +43,9 @@ def schedule_date(request):
     for stu in students:
         dates = decoder.decode(stu.date_to_come)
         if len(dates) >= 3:
-            err += [stu.name+"å·²ç¶“æŽƒæ»¿äº†"]
+            err += [stu.name+"¤w¸g±½º¡¤F"]
         elif date in dates:
-            err += [stu.name+"åœ¨ç•¶å¤©å·²ç¶“æœ‰æŽ’å®šæŽƒåœ°äº†"]
+            err += [stu.name+"¦b·í¤Ñ¤w¸g¦³±Æ©w±½¦a¤F"]
         else:
             dates += [date]
             stu.date_to_come = json.JSONEncoder().encode(dates)
