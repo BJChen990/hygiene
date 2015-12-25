@@ -1,19 +1,26 @@
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.template import RequestContext, loader
 from importing.models import Student
-from django.http import JsonResponse
-from django.core import serializers
+from json import JSONDecoder
 
 
 # Create your views here.
-def index(request):
-    return render(request,'search.html')
-
 def search_by_id(request,student_id):
-    stu_id = student_id
+    t_header = loader.get_template('header.html')
+    c_header = RequestContext(request, {'title': 'list'})
+
     try:
-        result = [Student.objects.get(student_id = stu_id)]
-        data = serializers.serialize('json', result)
-        return JsonResponse(data,safe=False)
+        student = Student.objects.get(student_id = student_id)
+        student.date_to_come = JSONDecoder().decode( student.date_to_come )
+        result = {'student' :  student }
     except:
-        return JsonResponse({"error":"failed"})
+        result = {'error': 'fail'}
+
+    t_content = loader.get_template('search.html')
+    c_content = RequestContext(request, result)
+
+    t_footer = loader.get_template('footer.html')
+    c_footer = RequestContext(request, {})
+
+    return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
 

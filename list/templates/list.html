@@ -1,13 +1,12 @@
-<html>
-<head>
-    <title>Manage page</title>
-    {% load staticfiles %}
-    <link rel="stylesheet" href='{% static "css/bootstrap.min.css" %}'>
-</head>
-<body>
-    <header id="class_selection" style="background-color:#c7bff5;padding:20px">
+    <header class="theme" id="class_selection" style="padding:20px">
+        <form id="date_picker" method="GET">
+            <label>選取日期</label>
+            <input type="date" id="date">
+            <button type="submit" id="submit">查詢</button>
+        </form>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
+        <header><h2>{{ today }}</h2></header>
         <table class="table table-bordered">
             <thead><tr>
                 <th>姓名</th>
@@ -26,9 +25,11 @@
             {% endfor %}
         </table>
     </section>
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
     <script>
+        $('#submit').click(function(e){
+            var d = $('#date').val();
+            form = $('#date_picker');
+            form.attr('action','/list/'+d+'/');
+            form.submit();
+        });
     </script>
-</body>
-</html>

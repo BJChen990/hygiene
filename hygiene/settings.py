@@ -39,6 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'importing',
     'managing',
+    'search',
+    'list',
+    'index',
+
 ]
 
 MIDDLEWARE_CLASSES = [

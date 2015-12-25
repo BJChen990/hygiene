@@ -1,0 +1,12 @@
+
+    <script>
+    $('#search-btn').click(function(e){
+        var d = $('#keyword').val();
+        form = $('#search');
+        form.attr('action','/search/id/'+d+'/');
+        form.submit();
+    });
+    </script>
+    </section>
+</body>
+</html>

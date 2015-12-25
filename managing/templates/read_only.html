@@ -1,11 +1,4 @@
-<html>
-<head>
-    <title>Manage page</title>
-    {% load staticfiles %}
-    <link rel="stylesheet" href='{% static "css/bootstrap.min.css" %}'>
-</head>
-<body>
-    <header id="class_selection" style="background-color:#c7bff5;padding:20px">
+    <header id="class_selection" style="padding:20px" class="theme">
         <header>
             <h3>選擇年級</h3>
             <div class="btn-group" id="grade-group">
@@ -22,7 +15,6 @@
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
     </section>
 
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
     <script>
         $('#grade-group').click(function(e){
             var grade_dom = $(e.target);
@@ -101,5 +93,3 @@
         }
 
     </script>
-</body>
-</html>

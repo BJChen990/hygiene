@@ -1,11 +1,4 @@
-<html>
-<head>
-    <title>Manage page</title>
-    {% load staticfiles %}
-    <link rel="stylesheet" href='{% static "css/bootstrap.min.css" %}'>
-</head>
-<body>
-    <header id="class_selection" style="background-color:#c7bff5;padding:20px">
+    <header id="class_selection" class="theme" style="padding:20px">
         <header>
             <h3>選擇年級</h3>
             <div class="btn-group" id="grade-group">
@@ -20,7 +13,13 @@
         <div class="class-container" data-grade="3"></div>
     </header>
     <section id="result_students" style="padding-bottom:80px; padding-left:15%; padding-right:15%">
-        {{ error }}
+    <h1>共選擇<span id="count">0</span>人</h1>
+    {% for e in error %}
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            {{ e }}
+        </div>
+    {% endfor %}
     </section>
     <section id="action_selection" style="background-color:#c7bff5;padding:20px;position: fixed;width: 100%;bottom: 0;">
         <p>增加掃地日期
@@ -29,8 +28,8 @@
         </p>
     </section>
 
-    <script src="{% static 'js/jquery-2.1.4.min.js' %}"></script>
     <script>
+        var count = 0;
         $('#grade-group').click(function(e){
             var grade_dom = $(e.target);
 
@@ -83,6 +82,7 @@
             documentFragment.append( $('<thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
                                         <th>掃地日期一</th><th>掃地日期二</th><th>掃地日期三</th></tr></thead>' ) );
 
+            count += students.length;
             students.forEach(function(value){
                 var fields = value.fields;
                 if ( fields.times_remain_to_clean > 0 ){
@@ -94,6 +94,7 @@
                     documentFragment.append(row);
                 }
             });
+            $('#count').text(count);
             $('#result_students').append( documentFragment );
         }
 
@@ -106,6 +107,12 @@
 
         function remove_students(grade,number){
             var dom = (number) ? $('table[data-grade='+grade+'][data-class='+number+']') : $('table[data-grade='+grade+']');
+
+            dom.each(function(idx,value){
+                var children = value.getElementsByTagName('tr');
+                count -= children.length -1 ;
+                $('#count').text(count);
+            });
             var parent = $(dom.parent());
             parent.hide();
             dom.remove();
@@ -124,5 +131,3 @@
             form.submit();
         });
     </script>
-</body>
-</html>

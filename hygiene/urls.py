@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 #from importing import urls as importing_urls
+from index.views import index
 
 urlpatterns = [
+    url(r'^$', index),
     url(r'^importing/', include('importing.urls') ),
     url(r'^managing/', include('managing.urls') ),
+    url(r'^search/', include('search.urls') ),
+    url(r'^list/', include('list.urls') ),
+
 ]

@@ -1,3 +1,5 @@
+from django.http import HttpResponse
+from django.template import RequestContext, loader
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core import serializers
@@ -6,7 +8,16 @@ import json
 
 # Create your views here.
 def index(request):
-    return render(request, "index.html", context={'error':[]})
+    t_header = loader.get_template('header.html')
+    c_header = RequestContext(request, {'title': 'list'})
+
+    t_content = loader.get_template('managing.html')
+    c_content = RequestContext(request, {'error':[]})
+
+    t_footer = loader.get_template('footer.html')
+    c_footer = RequestContext(request, {})
+
+    return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
 
 def request_classes(request, grade):
     classes = Class.objects.filter(grade=grade)
@@ -20,6 +31,7 @@ def request_students(request, grade, number):
     return JsonResponse(data,safe=False)
 
 def schedule_date(request):
+
     decoder = json.JSONDecoder()
     err = []
     ids = decoder.decode( request.POST['students-id'] )
@@ -37,4 +49,32 @@ def schedule_date(request):
             stu.times_remain_to_clean -= 1
             stu.save()
 
-    return render(request, "index.html", context={'error':err} )
+
+    t_header = loader.get_template('header.html')
+    c_header = RequestContext(request, {'title': 'list'})
+
+    t_content = loader.get_template('managing.html')
+    c_content = RequestContext(request, {'error':err})
+
+    t_footer = loader.get_template('footer.html')
+    c_footer = RequestContext(request, {})
+
+    return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
+
+def read_only(request):
+    t_header = loader.get_template('header.html')
+    c_header = RequestContext(request, {'title': 'list'})
+
+    t_content = loader.get_template('read_only.html')
+    c_content = RequestContext(request, {})
+
+    t_footer = loader.get_template('footer.html')
+    c_footer = RequestContext(request, {})
+
+    return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
+
+
+def clear_all(request):
+    Class.objects.all().delete()
+    Student.objects.all().delete()
+    return redirect('/list/')
