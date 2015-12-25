@@ -1,33 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="ebdaf28d-3c86-4c9d-ac5f-b0e4eaead971" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/importing/migrations/0008_auto_20151223_1601.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/migrations/__init__.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/admin.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/apps.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/static/css/bootstrap.min.css.map" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/templates/footer.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/templates/header.html" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/models.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/tests.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/index/views.py" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/search/templates/detail.html" afterPath="" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/managing/templates/index.html" afterPath="$PROJECT_DIR$/managing/templates/managing.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/list/templates/list.html" afterPath="$PROJECT_DIR$/list/templates/list.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/importing/models.py" afterPath="$PROJECT_DIR$/importing/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/managing/templates/read_only.html" afterPath="$PROJECT_DIR$/managing/templates/read_only.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/search/templates/search.html" afterPath="$PROJECT_DIR$/search/templates/search.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hygiene/settings.py" afterPath="$PROJECT_DIR$/hygiene/settings.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/hygiene/urls.py" afterPath="$PROJECT_DIR$/hygiene/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/managing/urls.py" afterPath="$PROJECT_DIR$/managing/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/search/urls.py" afterPath="$PROJECT_DIR$/search/urls.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/importing/views.py" afterPath="$PROJECT_DIR$/importing/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/list/views.py" afterPath="$PROJECT_DIR$/list/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/managing/views.py" afterPath="$PROJECT_DIR$/managing/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/search/views.py" afterPath="$PROJECT_DIR$/search/views.py" />
-    </list>
+    <list default="true" id="ebdaf28d-3c86-4c9d-ac5f-b0e4eaead971" name="Default" comment="" />
     <ignored path="hygiene.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path=".idea/.name" />
@@ -63,7 +37,7 @@
       <file leaf-file-name="views.py" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/list/views.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.34591195" vertical-offset="0" max-vertical-offset="477">
+            <state vertical-scroll-proportion="0.34663865" vertical-offset="0" max-vertical-offset="476">
               <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
               <folding>
                 <element signature="e#0#36#0" expanded="true" />
@@ -536,8 +510,8 @@
     <editor active="false" />
     <layout>
       <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32738853" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32866243" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32738853" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32866243" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3299363" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -811,7 +785,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/list/views.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.34591195" vertical-offset="0" max-vertical-offset="477">
+        <state vertical-scroll-proportion="0.34663865" vertical-offset="0" max-vertical-offset="476">
           <caret line="11" column="19" selection-start-line="11" selection-start-column="19" selection-end-line="11" selection-end-column="19" />
           <folding>
             <element signature="e#0#36#0" expanded="true" />
