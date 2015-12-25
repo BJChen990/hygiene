@@ -31,11 +31,11 @@ def structure_class(sheet):
         match_result = regular_matcher.match(class_name)
         type_name = tmp_row[i].value
         if class_name != '':
-            if '一' == match_result.group(1):
+            if u'一' == match_result.group(1):
                 current_class = Class(grade=1, name=class_name, type= type_name, number=match_result.group(2))
-            elif '二' == match_result.group(1):
+            elif u'二' == match_result.group(1):
                 current_class = Class(grade=2, name=class_name, type= type_name, number=match_result.group(2))
-            elif '三' == match_result.group(1):
+            elif u'三' == match_result.group(1):
                 current_class = Class(grade=3, name=class_name, type= type_name, number=match_result.group(2))
             current_class.save()
             root += [current_class]
