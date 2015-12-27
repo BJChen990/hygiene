@@ -1,4 +1,4 @@
+db.sqlite3
 *.pyc
 .idea/*
-*.cpython-34.pyc
 */__pycache__/*
