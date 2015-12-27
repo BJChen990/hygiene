@@ -10,10 +10,13 @@ Function views
     2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
 """
 from django.conf.urls import url
-from search.views import search_by_id, update, add
+from index.views import index, register, do_register, login_page, do_login,logout
 
 urlpatterns = [
-    url(r'^id/(?P<student_id>[0-9]+)/$', search_by_id),
-    url(r'^update/$', update),
-    url(r'^add/$', add),
+    url(r'^$', index),
+    url(r'^register/$', register),
+    url(r'^do_register/$', do_register),
+    url(r'^login/$', login_page),
+    url(r'^do_login/$', do_login),
+    url(r'^logout/', logout)
 ]

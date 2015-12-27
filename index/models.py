@@ -1,6 +1,11 @@
 from django.db import models
 
 # Create your models here.
+class User(models.Model):
+    password = models.CharField(max_length=100)
+    user_id = models.CharField(max_length=20)
+    type = models.CharField(max_length=20, default='manager')
+
 class Class(models.Model):
     grade = models.TextField()
     number = models.PositiveSmallIntegerField(default=0)

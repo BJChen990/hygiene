@@ -1,18 +1,19 @@
 from django.http import HttpResponse, JsonResponse
-from django.template import RequestContext, loader
-
+from django.template import loader
 from datetime import date as Date
 from importing.models import Student
+from index.views import check_login
 import json
 
 
+
 # Create your views here.
+@check_login
 def list(request):
-
     t_header = loader.get_template('header.html')
-    c_header = RequestContext(request, {'title': 'list'})
+    c_header = {'title': 'list'}
 
-    theDate = request.GET['date'] if ('date' in request.GET.keys() and request.GET['date'] != '') \
+    theDate = process_date(request.GET['date']) if ('date' in request.GET.keys() and request.GET['date'] != '') \
                                   else Date.today().strftime('%Y-%m-%d')
 
     students = Student.objects.filter(date_schedule__contains=theDate)
@@ -20,17 +21,21 @@ def list(request):
         stu.today_status = json.JSONDecoder().decode(stu.date_schedule)[theDate]
 
     t_content = loader.get_template('list.html')
-    c_content = RequestContext(request, {'stu_list':students, 'today':theDate})
+    c_content = {'stu_list':students, 'today':theDate}
 
     t_footer = loader.get_template('footer.html')
-    c_footer = RequestContext(request, {})
+    c_footer = {}
 
-    return HttpResponse(t_header.render({'title': 'list'}) + t_content.render({'stu_list':students, 'today':theDate}) + t_footer.render({}) )
+    return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
+
+
+def process_date(date_str):
+    YY,MM,DD = date_str.split('-')
+    return Date(int(YY),int(MM),int(DD)).strftime('%Y-%m-%d')
 
 def complete(request):
     student_id = request.POST['student_id']
-    the_date = request.POST['date'] if ('date' in request.POST.keys() and request.POST['date'] != '') \
-                                    else Date.today().strftime('%Y-%m-%d')
+    the_date = process_date(request.POST['date'])
     print(the_date)
     try:
         student = Student.objects.get(student_id=student_id)
@@ -47,8 +52,8 @@ def complete(request):
 
 def cancel(request):
     student_id = request.POST['student_id']
-    the_date = request.POST['date'] if ('date' in request.POST.keys() and request.POST['date'] != '') \
-                                    else Date.today().strftime('%Y-%m-%d')
+    the_date = process_date(request.POST['date'])
+
     try:
         student = Student.objects.get(student_id=student_id)
         new_schedule = json.JSONDecoder().decode(student.date_schedule)
@@ -64,8 +69,7 @@ def cancel(request):
 
 def fail_the_rest(request):
     student_ids = json.JSONDecoder().decode(request.POST['student_ids'])
-    the_date = request.POST['date'] if ('date' in request.POST.keys() and request.POST['date'] != '') \
-                                    else Date.today().strftime('%Y-%m-%d')
+    the_date = process_date(request.POST['date'])
 
     decoder = json.JSONDecoder()
     encoder = json.JSONEncoder()

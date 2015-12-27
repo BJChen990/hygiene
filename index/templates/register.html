@@ -1,0 +1,21 @@
+    <div class="row" style="padding-top:10%">
+        <div class="col-md-offset-3 col-md-6">
+            <header><h1>註冊</h1></header>
+            <form class="form-horizontal" action="/do_register/" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id-field">你的學號</label>
+                    <input type="text" class="form-control" name="student-id" id="id-field" placeholder="請輸入學號">
+                </div>
+                <div class="form-group">
+                    <label for="pwd-field">設定密碼</label>
+                    <input type="password" class="form-control" name="pwd" id="pwd-field" placeholder="xxxxxxxx">
+                </div>
+                <select class="form-control" name="type">
+                    <option value="root" {% if shouldHaveRoot %} disabled {% endif %}>最高權限</option>
+                    <option value="manager" >僅管理</option>
+                </select>
+                <button type="submit" class="btn btn-default">註冊</button>
+            </form>
+        </div>
+    </div>

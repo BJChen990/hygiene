@@ -12,21 +12,51 @@
                 <th>掃地狀態</th>
             </tr></thead>
 
-            <tr id="stu-{{ stu.student_id }}">
+            <tr id="stu-{{ student.student_id }}">
                 <td>{{ student.name }}</td>
                 <td>{{ student.student_id }}</td>
                 <td>{{ student.day_last }}</td>
+                <td>
                 {% for date,state in student.date_schedule.items %}
-                    <td>{{ date }}
-                        <select class="date-state" data-date="{{date}}">
-                                <option value="Fail" {% if state == 'Fail' %}selected{% endif %}>應到未到</option>
-                                <option value="Full" {% if state == 'Full' %}selected{% endif %}>打掃1次</option>
-                                <option value="OneThird" {% if state == 'OneThird' %}selected{% endif %}>打掃1/3次</option>
-                                <option value="Pending" {% if state == 'Pending' %}selected{% endif %}>有排班</option>
-                        </select>
-                    </td>
+                    {{ date }}
+                    <select class="date-state" data-date="{{date}}">
+                            <option value="Fail" {% if state == 'Fail' %}selected{% endif %}>應到未到</option>
+                            <option value="Full" {% if state == 'Full' %}selected{% endif %}>打掃1次</option>
+                            <option value="OneThird" {% if state == 'OneThird' %}selected{% endif %}>打掃1/3次</option>
+                            <option value="Pending" {% if state == 'Pending' %}selected{% endif %}>有排班</option>
+                    </select>
+                    <br>
                 {% endfor %}
-                <td><button type="button" id="update">更新</button></td>
+                </td>
+
+                <td>
+                    <button type="button" id="update">更新</button>
+
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                            新增
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                            <li>
+                                <form action="/search/add/" method="POST">
+                                    {% csrf_token %}
+                                    <input name="date" type="date">
+                                    <input name="student-id" type="hidden" value="{{ student.student_id }}">
+                                    <select name="type">
+                                        <option value="Fail">應到未到</option>
+                                        <option value="Full">打掃1次</option>
+                                        <option value="OneThird">打掃1/3次</option>
+                                        <option value="Pending">有排班</option>
+                                    </select>
+                                    <input type="submit">
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                </td>
+
+
             </tr>
 
             {% for d in student.date_to_come %}
@@ -34,12 +64,6 @@
             {% endfor %}
         </table>
     {% endif %}
-    </section>
-    <section id="action_selection" style="background-color:#c7bff5;padding:20px;position: fixed;width: 100%;bottom: 0;">
-        <p>增加掃地日期
-        <input type="date" id="date-picker">
-        <button type="button" id="submitter">確定</button>
-        </p>
     </section>
     <script>
         $('#update').click(function(e){
@@ -60,20 +84,4 @@
                 }
             });
         });
-
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
     </script>

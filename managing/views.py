@@ -8,8 +8,11 @@ from django.http import JsonResponse
 from django.core import serializers
 from importing.models import Class, Student
 import json
+from datetime import  date as Date
+from index.views import check_login
 
 # Create your views here.
+@check_login
 def index(request):
     t_header = loader.get_template('header.html')
     c_header = RequestContext(request, {'title': 'list'})
@@ -33,12 +36,14 @@ def request_students(request, grade, number):
     data =serializers.serialize('json', students)
     return JsonResponse(data,safe=False)
 
+
+@check_login
 def schedule_date(request):
     decoder = json.JSONDecoder()
 
     err = []
     student_ids = decoder.decode( request.POST['students-id'] )
-    assigned_date = request.POST['date']
+    assigned_date = process_date(request.POST['date'])
 
     students = Student.objects.filter(student_id__in=student_ids)
     for stu in students:
@@ -75,6 +80,7 @@ def schedule_date(request):
 
     return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
 
+@check_login
 def read_only(request):
     t_header = loader.get_template('header.html')
     c_header = RequestContext(request, {'title': 'list'})
@@ -87,6 +93,9 @@ def read_only(request):
 
     return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
 
+def process_date(date_str):
+    YY,MM,DD = date_str.split('-')
+    return Date(int(YY),int(MM),int(DD)).strftime('%Y-%m-%d')
 
 def clear_all(request):
     Class.objects.all().delete()
