@@ -8,9 +8,9 @@
             </div>
         </header>
         <h3>選擇班級</h3>
-        <div class="class-container" data-grade="1"  style="padding:10px"></div>
-        <div class="class-container" data-grade="2" style="padding:10px"></div>
-        <div class="class-container" data-grade="3" style="padding:10px"></div>
+        <div class="class-container" data-grade="1"></div>
+        <div class="class-container" data-grade="2"></div>
+        <div class="class-container" data-grade="3"></div>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
     </section>
@@ -25,13 +25,6 @@
             request_classes(grade_dom.data('grade'));
         });
 
-        $('.class-container').click(function(e){
-            var class_dom = $(e.target);
-
-            remove_students();
-            request_students( class_dom.data('grade'),class_dom.data('class') );
-        });
-
         function request_classes(num){
             $.getJSON('/managing/classes/'+num ,function(data){ handle_classes(data,num) });
         }
@@ -43,25 +36,29 @@
         function handle_classes(json,grade){
             var classes = JSON.parse(json);
             var documentFragment = $(document.createDocumentFragment());
-
+            var select = $('<select class="form-control"></select>');
+            select.append( $('<option>選擇班級</option>') );
             classes.forEach(function(value){
                 var fields = value.fields;
-                documentFragment.append( $('<button type="button" class="btn btn-default" \
-                                            data-grade="' + grade +
-                                            '" data-class="'+ fields.number+'" >' +
-                                            fields.name+'\n'+ fields.type+'</button>') );
+                select.append( $('<option value="'+grade+'-'+fields.number+'">'+fields.name+'</option>') );
             });
+
+            select.on('change', handle_select_change );
+            documentFragment.append(select);
             $('.class-container[data-grade='+ grade +']').append(documentFragment);
+        }
+
+        function handle_select_change(e){
+            remove_students();
+            var gn = e.target.value.split('-');
+            request_students(gn[0],gn[1]);
         }
 
         function handle_students(json,grade,num){
             var students = JSON.parse(json);
-            var documentFragment = $('<table class="table table-bordered" \
-                                      data-grade="'+grade+'" data-class="'+num+'"></table>');
-            documentFragment.append( $('<caption>'+grade+'年'+num+'班</caption>') );
-            documentFragment.append( $('<thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
-                                        <th>掃地狀況</th></tr></thead>' ) );
 
+            var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
+                                        <th>掃地狀況</th></tr></thead></table>');
             students.forEach(function(value){
                 var fields = value.fields;
                 var schedule = JSON.parse(fields.date_schedule);
@@ -89,9 +86,15 @@
                         dates_str += key+'  :  '+schedule[key] + '<br>';
                     }
                     row.append( $('<td>'+dates_str+'</td>') );
-                    documentFragment.append(row);
+                    table.append(row);
                 }
             });
+
+            var heading = $('<div class="panel-heading"><h2>' + grade + '年' + num +'班</h2></div>');
+            var documentFragment = $('<div class="panel panel-default"></div>');
+            documentFragment.append(heading);
+            documentFragment.append(table);
+
             $('#result_students').append( documentFragment );
         }
 
@@ -103,7 +106,7 @@
         }
 
         function remove_students(){
-            var dom = $('table[data-grade]');
+            var dom = $('.panel');
             var parent = $(dom.parent());
             parent.hide();
             dom.remove();

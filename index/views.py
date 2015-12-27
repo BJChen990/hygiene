@@ -76,11 +76,18 @@ def login_page(request):
 def do_login(request):
     if request.POST['pwd'] and request.POST['student-id']:
         student_id = request.POST['student-id']
-        user = User.objects.get(user_id=student_id)
-        if bcrypt.hashpw( request.POST['pwd'].encode('utf-8'), user.password.encode('utf-8') ):
-            request.session.set_expiry(3600)
-            request.session['user'] = student_id
-            request.session['type'] = user.type
+        try:
+            user = User.objects.get(user_id=student_id)
+            pwd = request.POST['pwd'].encode('utf-8')
+            hashed = user.password.encode('utf-8')
+
+            if bcrypt.hashpw( pwd, hashed ) == hashed:
+                request.session.set_expiry(3600)
+                request.session['user'] = student_id
+                request.session['type'] = user.type
+            return redirect('/')
+
+        except:
             return redirect('/')
     else:
         return redirect('/login/')

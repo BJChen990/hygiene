@@ -1,15 +1,25 @@
-<header class="theme" id="class_selection" style="padding:20px">
-        <form id="date_picker" method="GET" action="/list/">
-            <label>選取日期</label>
-            <input type="date" name="date" id="date" pattern="^(\d+)-(\d+)-(\d+)$">
-            <input type="submit">
+    <header class="theme" id="class_selection" style="padding:20px">
+        <form class="form-inline" id="date_picker" method="get" action="/list/">
+            <label for="inputDate">選取日期</label>
+            <div class="row">
+                <div class="form-group col-xs-6 col-sm-2 col-md-2">
+                    <input type="date" class="form-control" id="inputDate" name='date' pattern="^(\d+)-(\d+)-(\d+)$">
+                </div>
+                <button type="submit" class="btn btn-default col-xs-2 col-sm-1 col-md-1">前往</button>
+            </div>
         </form>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
-        <header><h2>{{ today }}</h2></header>
-        <button type="button" onclick="window.print();">列印</button>
-        <button type="button" onclick="move_remainer_to_fail();">將待打掃者歸類為未到</button>
-        <table class="table table-bordered" id="student_list">
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h2>{{ today }}</h2>
+                <button type="button" class="btn btn-default" onclick="window.print();">列印</button>
+                <button type="button" class="btn btn-default" onclick="move_remainer_to_fail();">歸類未到</button>
+            </div>
+
+          <!-- Table -->
+          <table class="table table-bordered" id="student_list">
             <thead><tr>
                 <th>姓名</th>
                 <th>學號</th>
@@ -20,17 +30,20 @@
                     <td>{{ stu.name }}</td>
                     <td>{{ stu.student_id }}</td>
                     {% if stu.today_status == "Full" %}
-                        <td>已掃完<button type="button" data-student-id="{{stu.student_id}}" data-type="Cancel">取消</button></td>
+                        <td>已掃完<button type="button" class="btn btn-danger" data-student-id="{{stu.student_id}}" data-type="Cancel">取消</button></td>
                     {% elif stu.today_status == "OneThird" %}
-                        <td>已掃完(1/3)<button type="button" data-student-id="{{ stu.student_id }}" data-type="Cancel">取消</button></td>
+                        <td>已掃完(1/3)<button type="button" class="btn btn-danger" data-student-id="{{ stu.student_id }}" data-type="Cancel">取消</button></td>
                     {% elif stu.today_status == "Fail" %}
                         <td>未到</td>
                     {% elif stu.today_status == "Pending" %}
-                        <td><button type="button" data-student-id="{{ stu.student_id }}" data-type="Finish">打卡</button></td>
+                        <td><button type="button" class="btn btn-success" data-student-id="{{ stu.student_id }}" data-type="Finish">打卡</button></td>
                     {% endif %}
                 </tr>
             {% endfor %}
         </table>
+        </div>
+
+
     </section>
     <script>
         $('#student_list').click(function(e){
@@ -44,8 +57,8 @@
             if (type == 'Finish'){
                 $.post('/list/complete/', data_to_send,function(data){
                     if (data.success){
-                        $('#stu-'+stu_id).append( $('<td>已完成 \
-                            <button type="button" data-student-id="'+ stu_id+'" data-type="Cancel">取消</button> </td>') );
+                        $('#stu-'+stu_id).append( $('<td>已完成\
+                            <button type="button" class="btn btn-danger" data-student-id="'+ stu_id+'" data-type="Cancel">取消</button> </td>') );
                         $(target.parent()).remove();
                     }
                 });
@@ -53,7 +66,7 @@
                 $.post('/list/cancel/',data_to_send,function(data){
                     if (data.success){
                         $('#stu-'+stu_id).append( $('<td>\
-                            <button type="button" data-student-id="'+ stu_id+'" data-type="Finish">打卡</button> </td>') );
+                            <button type="button" class="btn btn-success" data-student-id="'+ stu_id+'" data-type="Finish">打卡</button> </td>') );
                         $(target.parent()).remove();
                     }
                 });
@@ -95,8 +108,9 @@
         }
 
         $('#date_picker').submit(function(e){
-            if ( !/^(\d+)-(\d+)-(\d+)$/.exec($('#date').val() ) ){
+            if ( !/^(\d+)-(\d+)-(\d+)$/.exec($('#inputDate').val() ) ){
                 alert("時間格式應為 年份-月份-日");
+
                 return false;
             }
         });
