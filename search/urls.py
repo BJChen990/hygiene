@@ -10,8 +10,9 @@ Function views
     2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
 """
 from django.conf.urls import url
-from search.views import search_by_id
+from search.views import search_by_id, update
 
 urlpatterns = [
-    url(r'^id/(?P<student_id>[0-9]+)/$', search_by_id)
+    url(r'^id/(?P<student_id>[0-9]+)/$', search_by_id),
+    url(r'^update/$', update),
 ]

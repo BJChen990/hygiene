@@ -60,17 +60,35 @@
                                       data-grade="'+grade+'" data-class="'+num+'"></table>');
             documentFragment.append( $('<caption>'+grade+'年'+num+'班</caption>') );
             documentFragment.append( $('<thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
-                                        <th>掃地日期一</th><th>掃地日期二</th><th>掃地日期三</th></tr></thead>' ) );
+                                        <th>掃地狀況</th></tr></thead>' ) );
 
             students.forEach(function(value){
                 var fields = value.fields;
-                if ( fields.times_remain_to_clean > 0 ){
-                    var row = $('<tr data-student-id="'+fields.student_id+'"></tr>');
-                    row.append( $('<td>'+fields.name+'</td><td>'+fields.student_id+'</td><td>'+fields.times_remain_to_clean+'</td>') );
-                    JSON.parse(fields.date_to_come).forEach(function(value){
+                var schedule = JSON.parse(fields.date_schedule);
+                var day_last = fields.should_come_count;
+                var day_count = 0;
+                for ( key in schedule ){
+                    var state = schedule[key];
+                    if ( state == "Full"){
+                        day_count += 3;
+                    }else if( state == "OneThird" ){
+                        day_count += 1;
+                    }
+                }
+                day_last = fields.should_come_count*3 - day_count;
 
-                        row.append( $('<td>'+value+'</td>'));
-                    });
+                if ( day_last > 0 ){
+                    var row = $('<tr data-student-id="'+fields.student_id+'"></tr>');
+                    row.append( $('<td>'+fields.name+'</td><td>'+
+                                         fields.student_id+'</td><td>'+
+                                         Math.floor(day_last/3)+
+                                         ( (day_last%3) ? '又'+(day_last%3)+'/3' : '' ) +'</td>') );
+
+                    var dates_str = '';
+                    for (key in schedule){
+                        dates_str += key+'  :  '+schedule[key] + '<br>';
+                    }
+                    row.append( $('<td>'+dates_str+'</td>') );
                     documentFragment.append(row);
                 }
             });

@@ -9,12 +9,26 @@
         <table class="table table-bordered">
             <thead><tr>
                 <th>姓名</th><th>學號</th><th>剩餘掃地次數</th>
-                <th>掃地日期一</th><th>掃地日期二</th><th>掃地日期三</th>
+                <th>掃地狀態</th>
             </tr></thead>
-            <tr data-student-id="{{ student.student_id }}"></tr>
-            <td>{{ student.name }}</td>
-            <td>{{ student.student_id }}</td>
-            <td>{{ student.times_remain_to_clean }}</td>
+
+            <tr id="stu-{{ stu.student_id }}">
+                <td>{{ student.name }}</td>
+                <td>{{ student.student_id }}</td>
+                <td>{{ student.day_last }}</td>
+                {% for date,state in student.date_schedule.items %}
+                    <td>{{ date }}
+                        <select class="date-state" data-date="{{date}}">
+                                <option value="Fail" {% if state == 'Fail' %}selected{% endif %}>應到未到</option>
+                                <option value="Full" {% if state == 'Full' %}selected{% endif %}>打掃1次</option>
+                                <option value="OneThird" {% if state == 'OneThird' %}selected{% endif %}>打掃1/3次</option>
+                                <option value="Pending" {% if state == 'Pending' %}selected{% endif %}>有排班</option>
+                        </select>
+                    </td>
+                {% endfor %}
+                <td><button type="button" id="update">更新</button></td>
+            </tr>
+
             {% for d in student.date_to_come %}
                 <td>{{ d }}</td>
             {% endfor %}
@@ -27,5 +41,39 @@
         <button type="button" id="submitter">確定</button>
         </p>
     </section>
-</body>
-</html>
+    <script>
+        $('#update').click(function(e){
+            var x = $('.date-state');
+            var param = new Object();
+            var dates = new Object();
+            x.each(function(i,v){
+                var value = $(v);
+                dates[value.data('date')] = value.val();
+            });
+            param['theDates'] = JSON.stringify( dates );
+            param['student-id'] = '{{ student.student_id }}' ;
+            param['csrfmiddlewaretoken'] = getCookie('csrftoken');
+
+            $.post('/search/update/', param ,function(data){
+                if (data.success){
+                    alert("成功");
+                }
+            });
+        });
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>

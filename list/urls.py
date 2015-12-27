@@ -10,9 +10,13 @@ Function views
     2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
 """
 from django.conf.urls import url
-from list.views import list
+from list.views import list,complete, cancel, fail_the_rest
 
 urlpatterns = [
     url(r'^$', list, name='page'),
-    url(r'^(?P<date>[0-9-]+)/$', list)
+    url(r'^date/$', list),
+    url(r'complete/$', complete),
+    url(r'cancel/$', cancel),
+    url(r'fail_the_rest/$', fail_the_rest),
+
 ]

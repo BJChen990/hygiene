@@ -13,5 +13,5 @@ class Student(models.Model):
     gender = models.TextField(max_length=10)
     student_id = models.TextField(max_length=20)
     the_class = models.ForeignKey(Class, default=None)
-    times_remain_to_clean = models.PositiveSmallIntegerField(default=3)
-    date_to_come = models.TextField(max_length=60, default='[]')
+    should_come_count = models.PositiveSmallIntegerField(default=3)
+    date_schedule = models.TextField(max_length=60, default='{}')

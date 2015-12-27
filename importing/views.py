@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from importing.models import retreive_to_db
+import os
 
 # Create your views here.
 def import_page(request):
@@ -21,7 +22,11 @@ def import_page(request):
 
 def upload(request):
     file = request.FILES['xls_file']
+    days_to_come = request.POST['days_count']
     path = default_storage.save('tmp.xls', ContentFile( file.read() ) )
-    retreive_to_db(path)
-    default_storage.delete(path)
+    retreive_to_db(path,days_to_come)
+    for file in os.listdir('./'):
+        if file.endswith('.xls'):
+            print('remove'+file)
+            os.remove(file)
     return redirect('/importing/')

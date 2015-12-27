@@ -7,16 +7,16 @@ import re
 
 # Create your models here.
 #
-def retreive_to_db(file_name):
+def retreive_to_db(file_name,day_num):
     for sheet in structure_data(file_name):
-        structure_class(sheet)
+        structure_class(sheet,day_num)
 
 
 def structure_data(file_name):
     book = xlrd.open_workbook(file_name)
     return [book.sheet_by_index(i) for i in range(3)]
 
-def structure_class(sheet):
+def structure_class(sheet,day_num):
     root = []
     start_column = []
     class_end = []
@@ -52,7 +52,8 @@ def structure_class(sheet):
                                   name = current_row[j+1].value,
                                   student_id = current_row[j+2].value,
                                   gender = current_row[j+3].value,
-                                  the_class = root[idx]
+                                  the_class = root[idx],
+                                  should_come_count = day_num
                                   )
                 student.save()
                 students += [student]

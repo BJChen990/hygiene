@@ -1,35 +1,103 @@
-    <header class="theme" id="class_selection" style="padding:20px">
-        <form id="date_picker" method="GET">
+<header class="theme" id="class_selection" style="padding:20px">
+        <form id="date_picker" method="GET" action="/list/">
             <label>選取日期</label>
-            <input type="date" id="date">
-            <button type="submit" id="submit">查詢</button>
+            <input type="date" name="date" id="date" pattern="^(\d+)-(\d+)-(\d+)$">
+            <input type="submit">
         </form>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
         <header><h2>{{ today }}</h2></header>
-        <table class="table table-bordered">
+        <button type="button" onclick="window.print();">列印</button>
+        <button type="button" onclick="move_remainer_to_fail();">將待打掃者歸類為未到</button>
+        <table class="table table-bordered" id="student_list">
             <thead><tr>
                 <th>姓名</th>
                 <th>學號</th>
-                <th>剩餘掃地次數</th>
-                <th>掃地日期一</th>
-                <th>掃地日期二</th>
-                <th>掃地日期三</th>
+                <th>掃地狀況</th>
             </tr></thead>
             {% for stu in stu_list %}
-                <tr data-student-id="{{ stu.student_id }}">
+                <tr id="stu-{{ stu.student_id }}">
                     <td>{{ stu.name }}</td>
                     <td>{{ stu.student_id }}</td>
-                    <td>{{ stu.times_remain_to_clean }}</td>
+                    {% if stu.today_status == "Full" %}
+                        <td>已掃完<button type="button" data-student-id="{{stu.student_id}}" data-type="Cancel">取消</button></td>
+                    {% elif stu.today_status == "OneThird" %}
+                        <td>已掃完(1/3)<button type="button" data-student-id="{{ stu.student_id }}" data-type="Cancel">取消</button></td>
+                    {% elif stu.today_status == "Fail" %}
+                        <td>未到</td>
+                    {% elif stu.today_status == "Pending" %}
+                        <td><button type="button" data-student-id="{{ stu.student_id }}" data-type="Finish">打卡</button></td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </table>
     </section>
     <script>
-        $('#submit').click(function(e){
-            var d = $('#date').val();
-            form = $('#date_picker');
-            form.attr('action','/list/'+d+'/');
-            form.submit();
+        $('#student_list').click(function(e){
+            var target = $(e.target)
+            var stu_id = target.data('student-id');
+            var type = target.data('type');
+            var data_to_send = {student_id: stu_id,
+                                          csrfmiddlewaretoken:getCookie('csrftoken'),
+                                          date: '{{ today }}'};
+
+            if (type == 'Finish'){
+                $.post('/list/complete/', data_to_send,function(data){
+                    if (data.success){
+                        $('#stu-'+stu_id).append( $('<td>已完成 \
+                            <button type="button" data-student-id="'+ stu_id+'" data-type="Cancel">取消</button> </td>') );
+                        $(target.parent()).remove();
+                    }
+                });
+            }else if (type == 'Cancel'){
+                $.post('/list/cancel/',data_to_send,function(data){
+                    if (data.success){
+                        $('#stu-'+stu_id).append( $('<td>\
+                            <button type="button" data-student-id="'+ stu_id+'" data-type="Finish">打卡</button> </td>') );
+                        $(target.parent()).remove();
+                    }
+                });
+            }
+        });
+
+        function move_remainer_to_fail(){
+            var stu_ids = [];
+            var candidate = $('button[data-type="Finish"]');
+            candidate.each(function(i,v){
+                var button = $(v);
+                stu_ids.push( button.data('student-id') );
+            });
+            var data_to_send = {student_ids: JSON.stringify(stu_ids),
+                                csrfmiddlewaretoken:getCookie('csrftoken'),
+                                date: '{{ today }}'};
+
+            $.post('/list/fail_the_rest/',data_to_send,function(data){
+                if( data.success){
+                    candidate.after('未到').remove();
+                }
+            });
+        }
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie != '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $('#date_picker').submit(function(e){
+            if ( !/^(\d+)-(\d+)-(\d+)$/.exec($('#date').val() ) ){
+                alert("時間格式應為 年份-月份-日");
+                return false;
+            }
         });
     </script>

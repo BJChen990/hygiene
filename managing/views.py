@@ -34,22 +34,33 @@ def request_students(request, grade, number):
     return JsonResponse(data,safe=False)
 
 def schedule_date(request):
-
     decoder = json.JSONDecoder()
+
     err = []
-    ids = decoder.decode( request.POST['students-id'] )
-    date = request.POST['date']
-    students = Student.objects.filter(student_id__in=ids)
+    student_ids = decoder.decode( request.POST['students-id'] )
+    assigned_date = request.POST['date']
+
+    students = Student.objects.filter(student_id__in=student_ids)
     for stu in students:
-        dates = decoder.decode(stu.date_to_come)
-        if len(dates) >= 3:
-            err += [stu.name+u"已經掃滿了"]
-        elif date in dates:
+        date_schedule = decoder.decode(stu.date_schedule)
+
+        finished_count = 0
+
+        for key in date_schedule.keys():
+            if date_schedule[key] == "Full":
+                finished_count += 3
+            elif date_schedule[key] == "OneThird":
+                finished_count += 1
+
+        day_last = stu.should_come_count*3 - finished_count
+
+        if assigned_date in date_schedule.keys():
             err += [stu.name+u"在當天已經有排定掃地了"]
+        elif day_last <= 0:
+            err += [stu.name+u"已經掃滿了"]
         else:
-            dates += [date]
-            stu.date_to_come = json.JSONEncoder().encode(dates)
-            stu.times_remain_to_clean -= 1
+            date_schedule[assigned_date] = "Pending"
+            stu.date_schedule = json.JSONEncoder().encode(date_schedule)
             stu.save()
 
 
