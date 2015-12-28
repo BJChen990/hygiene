@@ -33,7 +33,7 @@
             <div class="form-group">
                 <input type="date" class="form-control" id="date-picker" name='date' pattern="^(\d+)-(\d+)-(\d+)$">
             </div>
-            <button type="submit" id="submitter" onclick="return false;" class="btn btn-default">前往</button>
+            <button type="submit" id="submitter" onclick="return false;" class="btn btn-default">指派</button>
             </div>
         </form>
     </section>
@@ -99,11 +99,17 @@
                                          Math.floor(day_last/3)+
                                          ( (day_last%3) ? '又'+(day_last%3)+'/3' : '' ) +'</td>') );
 
-                    var dates_str = '';
+                    var dates_str = '<ul class="list-group">';
                     for (key in schedule){
-                        dates_str += key+'  :  '+schedule[key] + '<br>';
+                        var type;
+                        var description;
+                        if ( schedule[key] == 'Pending'){   type = ''; description = '待掃中';}
+                        if ( schedule[key] == 'Full' || schedule[key] == 'OneThird'){    type = 'list-group-item-success';description = '已完成';}
+                        if ( schedule[key] == 'Fail'){    type = 'list-group-item-danger';description = '未打掃';}
+                        dates_str += '<li class="list-group-item '+ type +'">'+key+'  :  '+description+ '</li>';
                     }
-                    if (dates_str == '') dates_str = '無紀錄';
+                    dates_str += '</ul>';
+                    if (dates_str == '<ul class="list-group"></ul>') dates_str = '無紀錄';
                     row.append( $('<td>'+dates_str+'</td>') );
                     table.append(row);
                 }

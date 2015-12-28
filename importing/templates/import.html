@@ -1,14 +1,28 @@
-<html>
-<head>
-    <title>Import xls page</title>
-</head>
-<body>
-    <form action="/importing/upload/" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <label for="xls_input"></label>
-        <input name="xls_file" type="file" id="xls_input">
-        <input name="days_count" type="number" value=3>
-        <input type="submit">
-    </form>
-</body>
-</html>
+<div class="container" style="padding-top:100px">
+    <div class="panel panel-default">
+        <div class="panel-heading"><h1>匯入資料</h1></div>
+        <div class="panel-body">
+            <form action="/importing/upload/" class="dropzone form-horizontal" id="dropzone_field" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="day_to_come" class="col-sm-2 control-label">應掃天數</label>
+                    <div class="col-sm-10 col-md-4">
+                        <input type="number" name="days_count" class="form-control" id="day_to_come" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="xls_input" class="col-sm-2 control-label">選擇檔案</label>
+                    <div class="col-sm-10 col-md-4">
+                        <input type="file" name="xls_file" class="form-control" id="xls_input" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-default">上傳</button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
