@@ -1,16 +1,22 @@
     <header id="class_selection" class="theme" style="padding:20px">
         <header>
-            <h3>選擇年級</h3>
-            <div class="btn-group" id="grade-group">
-                <button class="btn btn-default" type="button" data-grade="1">一年級</button>
-                <button class="btn btn-default" type="button" data-grade="2">二年級</button>
-                <button class="btn btn-default" type="button" data-grade="3">三年級</button>
+            <h3>選擇班級</h3>
+            <div class="btn-group" role="group" aria-label="...">
+                {% for grade in grades %}
+                <div class="btn-group dropdown" role="group">
+                    <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        {% if forloop.counter == 1 %}一年級{% elif forloop.counter == 2 %}二年級{% elif forloop.counter == 3 %}三年級{% endif %}
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        {% for class in grade %}
+                        <li data-grade={{class.grade}} data-class={{class.number}}><a>{{class.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endfor %}
             </div>
         </header>
-        <h3>選擇班級</h3>
-        <div class="class-container" data-grade="1"></div>
-        <div class="class-container" data-grade="2"></div>
-        <div class="class-container" data-grade="3"></div>
     </header>
     <section id="result_students" style="padding-bottom:80px; padding-left:15%; padding-right:15%">
     <h1>共選擇<span id="count">0</span>人</h1>
@@ -22,31 +28,35 @@
     {% endfor %}
     </section>
     <section id="action_selection" style="background-color:#c7bff5;padding:20px;position: fixed;width: 100%;bottom: 0;">
-        <p>增加掃地日期
-        <input type="date" id="date-picker">
-        <button type="button" id="submitter">確定</button>
-        </p>
+        <form class="form-inline">
+            <label for="date-picker"><h4>增加掃地日期</h4></label>
+            <div class="form-group">
+                <input type="date" class="form-control" id="date-picker" name='date' pattern="^(\d+)-(\d+)-(\d+)$">
+            </div>
+            <button type="submit" id="submitter" onclick="return false;" class="btn btn-default">前往</button>
+            </div>
+        </form>
     </section>
 
     <script>
-
-
-
         var count = 0;
-        $('#grade-group').click(function(e){
-            var grade_dom = $(e.target);
+        var do_not_hide = false;
 
-            if ( !grade_dom.hasClass('active') ){
-                request_classes(grade_dom.data('grade'));
-            }else{
-                remove_classes(grade_dom.data('grade'));
-                remove_students(grade_dom.data('grade'));
+
+        $('.dropdown').on('hide.bs.dropdown', function (e,f) {
+            if ( do_not_hide ){
+                e.preventDefault();
+                do_not_hide = false;
             }
-            grade_dom.toggleClass('active');
+        })
+
+        $('.dropdown-menu').click(function(e){
+            do_not_hide = true;
         });
 
-        $('.class-container').click(function(e){
-            var class_dom = $(e.target);
+
+        $('.dropdown-menu > li').click(function(e){
+            var class_dom = $(this);
             if ( !class_dom.hasClass('active') ){
                 request_students( class_dom.data('grade'),class_dom.data('class') );
             }else{
@@ -55,38 +65,18 @@
             class_dom.toggleClass('active');
         });
 
-        function request_classes(num){
-            $.getJSON('/managing/classes/'+num ,function(data){ handle_classes(data,num) });
-        }
 
         function request_students(grade,class_number){
             $.getJSON('/managing/students/'+grade+'/'+class_number , function(data){ handle_students(data,grade,class_number) });
         }
 
-        function handle_classes(json,grade){
-            var classes = JSON.parse(json);
-            var documentFragment = $(document.createDocumentFragment());
-
-            classes.forEach(function(value){
-                var fields = value.fields;
-                documentFragment.append( $('<button type="button" class="btn btn-default" \
-                                            data-grade="' + grade +
-                                            '" data-class="'+ fields.number+'" >' +
-                                            fields.name+'\n'+ fields.type+'</button>') );
-            });
-            $('.class-container[data-grade='+ grade +']').append(documentFragment);
-        }
 
         function handle_students(json,grade,num){
             var students = JSON.parse(json);
-            var documentFragment = $('<table class="table table-bordered" \
-                                      data-grade="'+grade+'" data-class="'+num+'"></table>');
-            documentFragment.append( $('<caption>'+grade+'年'+num+'班</caption>') );
-            documentFragment.append( $('<thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
-                                        <th>掃地狀態</th></tr></thead>' ) );
-
             count += students.length;
 
+            var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘次數</th>\
+                                        <th>掃地狀況</th></tr></thead></table>');
             students.forEach(function(value){
                 var fields = value.fields;
                 var schedule = JSON.parse(fields.date_schedule);
@@ -113,25 +103,24 @@
                     for (key in schedule){
                         dates_str += key+'  :  '+schedule[key] + '<br>';
                     }
+                    if (dates_str == '') dates_str = '無紀錄';
                     row.append( $('<td>'+dates_str+'</td>') );
-                    documentFragment.append(row);
+                    table.append(row);
                 }
             });
 
+            var heading = $('<div class="panel-heading"><h2>' + grade + '年' + num +'班</h2></div>');
+            var documentFragment = $('<div class="panel panel-default" data-grade='+grade+' data-class='+num+'></div>');
+            documentFragment.append(heading);
+            documentFragment.append(table);
 
             $('#count').text(count);
             $('#result_students').append( documentFragment );
         }
 
-        function remove_classes(grade){
-            var dom = $('.class-container[data-grade='+ grade +']');
-            dom.hide();
-            dom.empty();
-            dom.show();
-        }
 
         function remove_students(grade,number){
-            var dom = (number) ? $('table[data-grade='+grade+'][data-class='+number+']') : $('table[data-grade='+grade+']');
+            var dom = $('.panel[data-grade='+grade+'][data-class='+number+']');
 
             dom.each(function(idx,value){
                 var children = value.getElementsByTagName('tr');

@@ -8,9 +8,9 @@
             </div>
         </header>
         <h3>選擇班級</h3>
-        <div class="class-container" data-grade="1"></div>
-        <div class="class-container" data-grade="2"></div>
-        <div class="class-container" data-grade="3"></div>
+        <div class="row">
+            <div class="class-container col-md-3 col-sm-4 col-xs-12"></div>
+        </div>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
     </section>
@@ -45,7 +45,7 @@
 
             select.on('change', handle_select_change );
             documentFragment.append(select);
-            $('.class-container[data-grade='+ grade +']').append(documentFragment);
+            $('.class-container').append(documentFragment);
         }
 
         function handle_select_change(e){
@@ -57,7 +57,7 @@
         function handle_students(json,grade,num){
             var students = JSON.parse(json);
 
-            var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘掃地次數</th>\
+            var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘次數</th>\
                                         <th>掃地狀況</th></tr></thead></table>');
             students.forEach(function(value){
                 var fields = value.fields;
@@ -85,6 +85,7 @@
                     for (key in schedule){
                         dates_str += key+'  :  '+schedule[key] + '<br>';
                     }
+                    if (dates_str == '') dates_str = '無紀錄';
                     row.append( $('<td>'+dates_str+'</td>') );
                     table.append(row);
                 }
@@ -99,7 +100,7 @@
         }
 
         function remove_classes(){
-            var dom = $('.class-container[data-grade]');
+            var dom = $('.class-container');
             dom.hide();
             dom.empty();
             dom.show();

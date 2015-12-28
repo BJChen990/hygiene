@@ -17,8 +17,14 @@ def index(request):
     t_header = loader.get_template('header.html')
     c_header = RequestContext(request, {'title': 'list'})
 
+    grades = []
+    grades += [Class.objects.filter(grade=1)]
+    grades += [Class.objects.filter(grade=2)]
+    grades += [Class.objects.filter(grade=3)]
+
+
     t_content = loader.get_template('managing.html')
-    c_content = RequestContext(request, {'error':[]})
+    c_content = RequestContext(request, {'error':[],'grades':grades})
 
     t_footer = loader.get_template('footer.html')
     c_footer = RequestContext(request, {})
