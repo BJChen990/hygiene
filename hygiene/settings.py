@@ -82,17 +82,16 @@ WSGI_APPLICATION = 'hygiene.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'heroku_cf3ceaeab8bff73',
         'USER': 'bc4c929b28c338',
         'PASSWORD': '090f8880',
-        'HOST': 'heroku_cf3ceaeab8bff73',   # Or an IP Address that your DB is hosted on
+        'HOST': 'us-cdbr-iron-east-03.cleardb.net',   # Or an IP Address that your DB is hosted on
     }
 }
-'''
+
 try:
 
     # Check to make sure DATABASES is set in settings.py file.
