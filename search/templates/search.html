@@ -32,7 +32,7 @@
                                 <option value="OneThird" {% if state == 'OneThird' %}selected{% endif %}>打掃1/3次</option>
                                 <option value="Pending" {% if state == 'Pending' %}selected{% endif %}>有排班</option>
                         </select>
-                        <button type="button" class="btn btn-default" id="update">更新</button>
+                        <button type="button" class="btn btn-default update">更新</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -67,7 +67,7 @@
     </section>
     <script>
 
-        $('#update').click(function(e){
+        $('.update').click(function(e){
             var x = $('.date-state');
             var param = new Object();
             var dates = new Object();
