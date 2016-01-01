@@ -103,6 +103,12 @@ def process_date(date_str):
     YY,MM,DD = date_str.split('-')
     return Date(int(YY),int(MM),int(DD)).strftime('%Y-%m-%d')
 
+@check_login
+def clear_schedule(request):
+    Student.objects.all().update(date_schedule='{}')
+    return redirect('/')
+
+@check_login
 def clear_all(request):
     Class.objects.all().delete()
     Student.objects.all().delete()

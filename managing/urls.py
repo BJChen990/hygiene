@@ -10,7 +10,7 @@ Function views
     2. Add a URL to urlpatterns:  url(r'^$', views.home, name='home')
 """
 from django.conf.urls import url
-from managing.views import index, request_classes, request_students, schedule_date, clear_all, read_only
+from managing.views import index, request_classes, request_students, schedule_date, clear_all, read_only, clear_schedule
 
 urlpatterns = [
     url(r'^$', index, name='page'),
@@ -18,6 +18,6 @@ urlpatterns = [
     url(r'^students/(?P<grade>[1-3])/(?P<number>[0-9]+)', request_students),
     url(r'^schedule_date/$', schedule_date),
     url(r'^clear/$', clear_all),
+    url(r'^clear_schedule/$', clear_schedule),
     url(r'^readonly/$', read_only),
-
 ]
