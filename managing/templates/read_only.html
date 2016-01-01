@@ -33,6 +33,10 @@
             $.getJSON('/managing/students/'+grade+'/'+class_number , function(data){ handle_students(data,grade,class_number) });
         }
 
+        function request_uncomming(grade){
+            $.getJSON('/managing/uncomming_students/'+grade+'/' , function(data){ handle_students(data,grade,"未到") });
+        }
+
         function handle_classes(json,grade){
             var classes = JSON.parse(json);
             var documentFragment = $(document.createDocumentFragment());
@@ -42,6 +46,8 @@
                 var fields = value.fields;
                 select.append( $('<option value="'+grade+'-'+fields.number+'">'+fields.name+'</option>') );
             });
+            select.append( $('<option value="'+grade+'-uncomming">'+grade+'年級未到</option>') );
+
 
             select.on('change', handle_select_change );
             documentFragment.append(select);
@@ -51,7 +57,12 @@
         function handle_select_change(e){
             remove_students();
             var gn = e.target.value.split('-');
-            request_students(gn[0],gn[1]);
+
+            if( gn[1] == "uncomming"){
+                request_uncomming(gn[0])
+            }else{
+                request_students(gn[0],gn[1]);
+            }
         }
 
         function handle_students(json,grade,num){

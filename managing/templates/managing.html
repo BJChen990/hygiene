@@ -10,8 +10,9 @@
                     </button>
                     <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
                         {% for class in grade %}
-                        <li data-grade={{class.grade}} data-class={{class.number}}><a>{{class.name}}</a></li>
+                        <li data-grade="{{class.grade}}" data-class="{{class.number}}"><a>{{class.name}}</a></li>
                         {% endfor %}
+                        <li data-grade="{{ forloop.counter }}" data-class="uncomming"><a>{{ forloop.counter }}年級未到</a></li>
                     </ul>
                 </div>
                 {% endfor %}
@@ -66,14 +67,17 @@
         });
 
 
-        function request_students(grade,class_number){
-            $.getJSON('/managing/students/'+grade+'/'+class_number , function(data){ handle_students(data,grade,class_number) });
+        function request_students(grade,class_param){
+            if( class_param == "uncomming" ){
+                $.getJSON('/managing/uncomming_students/'+grade+'/' , function(data){ handle_students(data,grade,"未到") });
+            }else{
+                $.getJSON('/managing/students/'+grade+'/'+class_param , function(data){ handle_students(data,grade,class_param) });
+            }
         }
 
 
         function handle_students(json,grade,num){
             var students = JSON.parse(json);
-            count += students.length;
 
             var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘次數</th>\
                                         <th>掃地狀況</th></tr></thead></table>');
@@ -93,6 +97,7 @@
                 day_last = fields.should_come_count*3 - day_count;
 
                 if ( day_last > 0 ){
+                    count += 1
                     var row = $('<tr data-student-id="'+fields.student_id+'"></tr>');
                     row.append( $('<td>'+fields.name+'</td><td>'+
                                          fields.student_id+'</td><td>'+
@@ -126,8 +131,12 @@
 
 
         function remove_students(grade,number){
-            var dom = $('.panel[data-grade='+grade+'][data-class='+number+']');
-
+            var dom;
+            if (number == "uncomming"){
+                dom = $('.panel[data-grade='+grade+'][data-class="未到"]');
+            }else{
+                dom = $('.panel[data-grade='+grade+'][data-class='+number+']');
+            }
             dom.each(function(idx,value){
                 var children = value.getElementsByTagName('tr');
                 count -= children.length -1 ;

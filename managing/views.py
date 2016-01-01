@@ -12,6 +12,22 @@ from datetime import  date as Date
 from index.views import check_login
 
 # Create your views here.
+decoder = json.JSONDecoder()
+
+
+
+def left_days(student):
+    date_schedule = decoder.decode(student.date_schedule)
+
+    finished_count = 0
+    for key in date_schedule.keys():
+        if date_schedule[key] == "Full":
+            finished_count += 3
+        elif date_schedule[key] == "OneThird":
+            finished_count += 1
+
+    return student.should_come_count*3 - finished_count
+
 @check_login
 def index(request):
     t_header = loader.get_template('header.html')
@@ -42,10 +58,14 @@ def request_students(request, grade, number):
     data =serializers.serialize('json', students)
     return JsonResponse(data,safe=False)
 
+def request_uncomming_students(request, grade):
+    students = Student.objects.filter(the_class__grade__contains=grade).filter(date_schedule__contains="Fail")
+    students = [ student for student in students if left_days(student) > 0 ]
+    data =serializers.serialize('json', students)
+    return JsonResponse(data,safe=False)
 
 @check_login
 def schedule_date(request):
-    decoder = json.JSONDecoder()
 
     err = []
     student_ids = decoder.decode( request.POST['students-id'] )
@@ -55,15 +75,7 @@ def schedule_date(request):
     for stu in students:
         date_schedule = decoder.decode(stu.date_schedule)
 
-        finished_count = 0
-
-        for key in date_schedule.keys():
-            if date_schedule[key] == "Full":
-                finished_count += 3
-            elif date_schedule[key] == "OneThird":
-                finished_count += 1
-
-        day_last = stu.should_come_count*3 - finished_count
+        day_last = left_days(stu)
 
         if assigned_date in date_schedule.keys():
             err += [stu.name+u"在當天已經有排定掃地了"]
