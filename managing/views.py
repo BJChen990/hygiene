@@ -6,8 +6,10 @@ from django.template import RequestContext, loader
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.core import serializers
+from django.db import connection
 from importing.models import Class, Student
 import json
+
 from datetime import  date as Date
 from index.views import check_login
 
@@ -17,16 +19,14 @@ decoder = json.JSONDecoder()
 
 
 def left_days(student):
-    date_schedule = decoder.decode(student.date_schedule)
-
+    date_schedule = decoder.decode(student['date_schedule'])
     finished_count = 0
     for key in date_schedule.keys():
         if date_schedule[key] == "Full":
             finished_count += 3
         elif date_schedule[key] == "OneThird":
             finished_count += 1
-
-    return student.should_come_count*3 - finished_count
+    return student['should_come_count']*3 - finished_count
 
 @check_login
 def index(request):
@@ -58,10 +58,30 @@ def request_students(request, grade, number):
     data =serializers.serialize('json', students)
     return JsonResponse(data,safe=False)
 
+def dictfetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
 def request_uncomming_students(request, grade):
-    students = Student.objects.filter(the_class__grade__contains=grade).filter(date_schedule__contains="Fail")
+
+    cursor = connection.cursor()
+
+    prequery = \
+    """(SELECT the_class_id,name,date_schedule,student_id,id_in_class, should_come_count
+        FROM `index_student`
+        WHERE INSTR(`date_schedule`,'Fail') )"""
+
+    cursor.execute("""SELECT a.name as class_name, a.id, b.student_id, b.should_come_count, b.name, b.date_schedule, b.id_in_class
+                                    FROM `index_class` a, """+
+                                    prequery + " b WHERE a.id = b.the_class_id AND a.grade = %s ORDER BY class_name;" % grade)
+
+    students = dictfetchall(cursor)
     students = [ student for student in students if left_days(student) > 0 ]
-    data =serializers.serialize('json', students)
+    data = json.JSONEncoder().encode(students)
     return JsonResponse(data,safe=False)
 
 @check_login

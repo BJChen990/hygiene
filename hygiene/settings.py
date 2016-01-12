@@ -85,13 +85,25 @@ WSGI_APPLICATION = 'hygiene.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'test_ksvcs',
+        'USER': 'root',
+        'PASSWORD': 'aa147852369',
+        'HOST': 'localhost',   # Or an IP Address that your DB is hosted on
+    }
+}
+
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'heroku_cf3ceaeab8bff73',
         'USER': 'bc4c929b28c338',
         'PASSWORD': '090f8880',
         'HOST': 'us-cdbr-iron-east-03.cleardb.net',   # Or an IP Address that your DB is hosted on
     }
 }
-
+'''
+"""
 try:
 
     # Check to make sure DATABASES is set in settings.py file.
@@ -121,7 +133,7 @@ try:
 except Exception:
     print 'Unexpected error:', sys.exc_info()
 
-
+"""
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators

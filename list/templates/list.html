@@ -3,75 +3,101 @@
             <label for="inputDate">選取日期</label>
             <div class="row">
                 <div class="form-group">
-                    <input type="date" class="form-control" id="inputDate" name='date' pattern="^(\d+)-(\d+)-(\d+)$">
+                    <input type="date" class="form-control" id="inputDate" name='date'
+                           onchange="date_picker.submit();" pattern="^(\d+)-(\d+)-(\d+)$">
                 </div>
-                <button type="submit" class="btn btn-default">前往</button>
             </div>
         </form>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
 
         <header class="page-header">
-            <h1>{{the_date.Y}}年{{the_date.M}}月{{the_date.D}}日</h1>
+            <h1>{{the_date}}</h1>
+            <button type="button" class="btn btn-default" onclick="window.print();">列印</button>
+            <button type="button" class="btn btn-default" onclick="move_remainer_to_fail();">歸類未到</button>
         </header>
 
-
+        {% for class,stu_list in student_by_class.items %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                <h2></h2>
-                <button type="button" class="btn btn-default" onclick="window.print();">列印</button>
-                <button type="button" class="btn btn-default" onclick="move_remainer_to_fail();">歸類未到</button>
+                <h2>{{ class }}</h2>
             </div>
             <!-- Table -->
-            <table class="table table-bordered" id="student_list">
+            <table class="table table-bordered student_list">
                 <thead><tr>
                     <th>姓名</th>
+                    <th>座號</th>
                     <th>學號</th>
-                    <th>掃地狀況</th>
+                    <th>狀況</th>
+                    <th>行動</th>
+                    <th>簽退</th>
                 </tr></thead>
                 {% for stu in stu_list %}
                     <tr id="stu-{{ stu.student_id }}">
                         <td>{{ stu.name }}</td>
+                        <td>{{ stu.id_in_class }}</td>
                         <td>{{ stu.student_id }}</td>
                         {% if stu.today_status == "Full" %}
-                            <td>已掃完<button type="button" class="btn btn-danger" data-student-id="{{stu.student_id}}" data-type="Cancel">取消</button></td>
+                            <td>已掃完</td><td><button type="button" class="btn btn-danger" data-student-id="{{stu.student_id}}" data-type="Cancel">取消</button></td>
                         {% elif stu.today_status == "OneThird" %}
-                            <td>已掃完(1/3)<button type="button" class="btn btn-danger" data-student-id="{{ stu.student_id }}" data-type="Cancel">取消</button></td>
+                            <td>已掃完(1/3)</td><td><button type="button" class="btn btn-danger" data-student-id="{{ stu.student_id }}" data-type="Cancel">取消</button></td>
                         {% elif stu.today_status == "Fail" %}
-                            <td>未到</td>
+                            <td>未到</td></td><td>
                         {% elif stu.today_status == "Pending" %}
-                            <td><button type="button" class="btn btn-success" data-student-id="{{ stu.student_id }}" data-type="Finish">打卡</button></td>
+                            <td>排定</td><td><button type="button" class="btn btn-success" data-student-id="{{ stu.student_id }}" data-type="Finish">打卡</button></td>
                         {% endif %}
+                        <td></td>
                     </tr>
                 {% endfor %}
             </table>
         </div>
-
+        {% endfor %}
 
     </section>
     <script>
-        $('#student_list').click(function(e){
+        $('.student_list').click(function(e){
             var target = $(e.target)
             var stu_id = target.data('student-id');
             var type = target.data('type');
             var data_to_send = {student_id: stu_id,
                                 csrfmiddlewaretoken:getCookie('csrftoken'),
-                                date: '{{ today }}'};
+                                date: '{{ the_date }}'};
 
             if (type == 'Finish'){
                 $.post('/list/complete/', data_to_send,function(data){
                     if (data.success){
-                        $('#stu-'+stu_id).append( $('<td>已完成\
-                            <button type="button" class="btn btn-danger" data-student-id="'+ stu_id+'" data-type="Cancel">取消</button> </td>') );
-                        $(target.parent()).remove();
+                        var local_target = target;
+                        var status = $(target.parent().prev());
+                        local_target.hide();
+                        status.hide();
+
+                        status.text('已掃完')
+                        local_target.addClass('btn-danger');
+                        local_target.removeClass('btn-success');
+                        local_target.attr('data-type','Cancel');
+                        local_target.text('取消');
+
+                        status.show()
+                        local_target.show();
                     }
                 });
             }else if (type == 'Cancel'){
                 $.post('/list/cancel/',data_to_send,function(data){
                     if (data.success){
-                        $('#stu-'+stu_id).append( $('<td>\
-                            <button type="button" class="btn btn-success" data-student-id="'+ stu_id+'" data-type="Finish">打卡</button> </td>') );
-                        $(target.parent()).remove();
+                        var local_target = target;
+                        var status = $(target.parent().prev());
+                        local_target.hide();
+                        status.hide();
+
+                        status.text('未打掃')
+
+                        local_target.removeClass('btn-danger');
+                        local_target.addClass('btn-success');
+                        local_target.text('打卡');
+                        local_target.attr('data-type','Finish');
+
+                        local_target.show();
+                        status.show()
                     }
                 });
             }
@@ -86,11 +112,13 @@
             });
             var data_to_send = {student_ids: JSON.stringify(stu_ids),
                                 csrfmiddlewaretoken:getCookie('csrftoken'),
-                                date: '{{ today }}'};
+                                date: '{{ the_date }}'};
 
             $.post('/list/fail_the_rest/',data_to_send,function(data){
                 if( data.success){
-                    candidate.after('未到').remove();
+
+                    candidate.parent().prev().text('未到');
+                    candidate.remove();
                 }
             });
         }
@@ -114,7 +142,6 @@
         $('#date_picker').submit(function(e){
             if ( !/^(\d+)-(\d+)-(\d+)$/.exec($('#inputDate').val() ) ){
                 alert("時間格式應為 年份-月份-日");
-
                 return false;
             }
         });
