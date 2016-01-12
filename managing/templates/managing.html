@@ -78,7 +78,6 @@
 
         function handle_students(json,grade,num){
             var students = JSON.parse(json);
-
             var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘次數</th>\
                                         <th>掃地狀況</th></tr></thead></table>');
             students.forEach(function(value){

@@ -15,13 +15,14 @@ def list(request):
 
     theDate = process_date(request.GET['date']) if ('date' in request.GET.keys() and request.GET['date'] != '') \
                                   else Date.today().strftime('%Y-%m-%d')
+    year,month,date = theDate.split('-')
 
     students = Student.objects.filter(date_schedule__contains=theDate)
     for stu in students:
         stu.today_status = json.JSONDecoder().decode(stu.date_schedule)[theDate]
 
     t_content = loader.get_template('list.html')
-    c_content = {'stu_list':students, 'today':theDate}
+    c_content = {'stu_list':students, 'the_date':{'Y':year,'M':month,'D':date}}
 
     t_footer = loader.get_template('footer.html')
     c_footer = {}
