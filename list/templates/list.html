@@ -58,7 +58,7 @@
         $('.student_list').click(function(e){
             var target = $(e.target)
             var stu_id = target.data('student-id');
-            var type = target.data('type');
+            var type = target.attr('data-type');
             var data_to_send = {student_id: stu_id,
                                 csrfmiddlewaretoken:getCookie('csrftoken'),
                                 date: '{{ the_date }}'};
