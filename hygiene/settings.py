@@ -82,6 +82,7 @@ WSGI_APPLICATION = 'hygiene.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
+'''
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -102,8 +103,6 @@ DATABASES = {
         'HOST': 'us-cdbr-iron-east-03.cleardb.net',   # Or an IP Address that your DB is hosted on
     }
 }
-'''
-"""
 try:
 
     # Check to make sure DATABASES is set in settings.py file.
@@ -133,7 +132,6 @@ try:
 except Exception:
     print 'Unexpected error:', sys.exc_info()
 
-"""
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
