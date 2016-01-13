@@ -82,7 +82,7 @@ WSGI_APPLICATION = 'hygiene.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
-'''
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -131,7 +131,7 @@ try:
             DATABASES['default']['ENGINE'] = 'django.db.backends.mysql'
 except Exception:
     print 'Unexpected error:', sys.exc_info()
-
+'''
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
