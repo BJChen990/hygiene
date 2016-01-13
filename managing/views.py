@@ -48,8 +48,11 @@ def index(request):
     return HttpResponse(t_header.render(c_header) + t_content.render(c_content) + t_footer.render(c_footer) )
 
 def request_classes(request, grade):
-    classes = Class.objects.filter(grade=grade)
-    data = serializers.serialize('json', classes)
+
+    cursor = connection.cursor()
+    cursor.execute('''SELECT * FROM `index_class` WHERE grade = %s;'''% grade )
+    classes = dictfetchall(cursor)
+    data = json.JSONEncoder().encode(classes)
     return JsonResponse(data,safe=False)
 
 def request_students(request, grade, number):
