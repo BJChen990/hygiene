@@ -19,14 +19,22 @@ decoder = json.JSONDecoder()
 
 
 def left_days(student):
-    date_schedule = decoder.decode(student['date_schedule'])
+    try:
+        date_schedule = decoder.decode(student['date_schedule'])
+    except:
+        date_schedule = decoder.decode(student.date_schedule)
+
     finished_count = 0
     for key in date_schedule.keys():
         if date_schedule[key] == "Full":
             finished_count += 3
         elif date_schedule[key] == "OneThird":
             finished_count += 1
-    return student['should_come_count']*3 - finished_count
+    try:
+        return student['should_come_count']*3 - finished_count
+    except:
+        return student.should_come_count*3 - finished_count
+
 
 @check_login
 def index(request):
@@ -57,7 +65,7 @@ def request_classes(request, grade):
 
 def request_students(request, grade, number):
     cursor = connection.cursor()
-    cursor.execute('''SELECT a.*
+    cursor.execute('''SELECT a.*, b.name as class_name
                       FROM
                         (SELECT * FROM `index_class` WHERE grade = %s AND number = %s) b,
                         `index_student` a

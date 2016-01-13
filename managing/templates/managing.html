@@ -43,7 +43,6 @@
         var count = 0;
         var do_not_hide = false;
 
-
         $('.dropdown').on('hide.bs.dropdown', function (e,f) {
             if ( do_not_hide ){
                 e.preventDefault();
@@ -78,31 +77,24 @@
 
         function handle_students(json,grade,num){
             var students = JSON.parse(json);
+            var local_count = 0;
+            var table = $('<table class="table table-bordered"></table>');
+            table.append('<thead><tr><th>班級</th><th>姓名</th><th>座號</th><th>學號</th><th>剩餘次數</th><th>掃地狀況</th></tr></thead>');
 
-            var table = $('<table class="table table-bordered"><thead><tr><th>姓名</th><th>學號</th><th>剩餘次數</th>\
-                                        <th>掃地狀況</th></tr></thead></table>');
-            students.forEach(function(value){
-                var fields = value.fields;
+            students.forEach(function(v){
+                var fields = v;
                 var schedule = JSON.parse(fields.date_schedule);
-                var day_last = fields.should_come_count;
-                var day_count = 0;
-                for ( key in schedule ){
-                    var state = schedule[key];
-                    if ( state == "Full"){
-                        day_count += 3;
-                    }else if( state == "OneThird" ){
-                        day_count += 1;
-                    }
-                }
-                day_last = fields.should_come_count*3 - day_count;
+                var day_last = day_last_parser(fields.should_come_count, schedule);
 
-                if ( day_last > 0 ){
-                    count += 1
+                if ( day_last.count > 0 ){
+                    local_count += 1;
                     var row = $('<tr data-student-id="'+fields.student_id+'"></tr>');
-                    row.append( $('<td>'+fields.name+'</td><td>'+
-                                         fields.student_id+'</td><td>'+
-                                         Math.floor(day_last/3)+
-                                         ( (day_last%3) ? '又'+(day_last%3)+'/3' : '' ) +'</td>') );
+                    row.append( $('<td>'+fields.class_name+'</td>') );
+                    row.append( $('<td>'+fields.name+'</td>') );
+                    row.append( $('<td>'+fields.id_in_class+'</td>') );
+                    row.append( $('<td>'+fields.student_id+'</td>') );
+                    row.append( $('<td>'+fields.name+'</td>') );
+                    row.append( $('<td>'+day_last.str+'</td>') );
 
                     var dates_str = '<ul class="list-group">';
                     for (key in schedule){
@@ -121,7 +113,8 @@
             });
 
             var heading = $('<div class="panel-heading"><h2>' + grade + '年' + num +'班</h2></div>');
-            var documentFragment = $('<div class="panel panel-default" data-grade='+grade+' data-class='+num+'></div>');
+            var documentFragment = $('<div class="panel panel-default" data-grade='+grade+' data-class='+num+' data-student-count='+local_count+'></div>');
+            count += local_count;
             documentFragment.append(heading);
             documentFragment.append(table);
 
@@ -129,6 +122,20 @@
             $('#result_students').append( documentFragment );
         }
 
+        function day_last_parser(day_come_count,schedule){
+            var day_count = 0;
+            for ( key in schedule ){
+                var state = schedule[key];
+                if ( state == "Full"){
+                    day_count += 3;
+                }else if( state == "OneThird" ){
+                    day_count += 1;
+                }
+            }
+            day_last = day_come_count*3 - day_count;
+            day_last_str = Math.floor(day_last/3) + ( (day_last%3) ? '又'+(day_last%3)+'/3' : '' );
+            return {count: day_last, str: day_last_str};
+        }
 
         function remove_students(grade,number){
             var dom;
@@ -139,7 +146,7 @@
             }
             dom.each(function(idx,value){
                 var children = value.getElementsByTagName('tr');
-                count -= children.length -1 ;
+                count -= dom.data('student-count');
                 $('#count').text(count);
             });
             var parent = $(dom.parent());

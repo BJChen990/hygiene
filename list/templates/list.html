@@ -21,9 +21,10 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h2>{{ class }}</h2>
+                <button class="btn btn-default hide-btn">隱藏/顯示</button>
             </div>
             <!-- Table -->
-            <table class="table table-bordered student_list">
+            <table class="table table-bordered student_list hidden" style="display:none;">
                 <thead><tr>
                     <th>姓名</th>
                     <th>座號</th>
@@ -55,6 +56,17 @@
 
     </section>
     <script>
+        $('.hide-btn').click(function(e){
+            var table = $($(this).parent().next());
+            if( table.hasClass('hidden') ){
+                table.show();
+                table.removeClass('hidden');
+            }else{
+                table.hide();
+                table.addClass('hidden');
+            }
+        });
+
         $('.student_list').click(function(e){
             var target = $(e.target)
             var stu_id = target.data('student-id');
