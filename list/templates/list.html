@@ -43,15 +43,6 @@
                         <td>{{ stu.name }}</td>
                         <td>{{ stu.id_in_class }}</td>
                         <td>{{ stu.student_id }}</td>
-                        {% if stu.today_status == "Full" %}
-                            <td>已掃完</td><td><button type="button" class="btn btn-danger" data-student-id="{{stu.student_id}}" data-type="Cancel">取消</button></td>
-                        {% elif stu.today_status == "OneThird" %}
-                            <td>已掃完(1/3)</td><td><button type="button" class="btn btn-danger" data-student-id="{{ stu.student_id }}" data-type="Cancel">取消</button></td>
-                        {% elif stu.today_status == "Fail" %}
-                            <td>未到</td></td><td>
-                        {% elif stu.today_status == "Pending" %}
-                            <td>排定</td><td><button type="button" class="btn btn-success" data-student-id="{{ stu.student_id }}" data-type="Finish">打卡</button></td>
-                        {% endif %}
                         <td></td>
                     </tr>
                 {% endfor %}
@@ -63,32 +54,60 @@
     {% load staticfiles %}
     <script src="{% static 'js/react.min.js' %}"></script>
     <script>
-        const testData = [ ['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3']];
-        const CCClasses = {
-            {% for class,stu_list in student_by_class.items %}
-            '{{ class }}':[
-                {% for stu in stu_list %}
-                ['{{stu.name}}','{{stu.id_in_class}}','{{stu.student_id}}','{{stu.today_status}}'],
-                {% endfor %}
-                ],
-            {% endfor %}
-            };
+        const CCClasses = { {% for class,stu_list in student_by_class.items %}
+            '{{ class }}':[{% for stu in stu_list %}['{{stu.name}}','{{stu.id_in_class}}','{{stu.student_id}}','{{stu.today_status}}'],
+                {% endfor %}],{% endfor %}};
 
         var theRow = React.createClass({
             submitByState: function(){
-                console.log('clicked');
+                var newData = this.state.data.slice();
+                var newStatus;
+                switch(newData[3]){
+                    case "Full":
+                    case "OneThird":
+                    case "Fail":
+                        newData[3] = "Pending";
+                        break;
+                    case "Pending":
+                        newData[3] = "Fail";
+                        break;
+                }
+                this.setState({
+                    data: newData,
+                });
+            },
+            getInitialState: function() {
+                return {data: this.props.initialData};
             },
             render: function(){
                 var self = this;
-                var button = (true) ? React.DOM.button({className:'btn btn-success', onClick:self.submitByState},'打卡') :
-                                      React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
+                var status;
+                var button;
+                switch(this.state.data[3]){
+                    case "Full":
+                        status = '已掃完';
+                        button = React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
+                        break;
+                    case "OneThird":
+                        status = '已掃完(1/3)';
+                        button = React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
+                        break;
+                    case "Fail":
+                        status = '未到';
+                        button = React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
+                        break;
+                    case "Pending":
+                        status = '排定';
+                        button = React.DOM.button({className:'btn btn-success', onClick:self.submitByState},'打卡');
+                        break;
+                }
                 return (
                     React.DOM.tr(null,
-                        this.props.data.map( function(cell,idx){
+                        this.state.data.slice(0,-1).map( function(cell,idx){
                             return React.DOM.td(null,cell);
                         }),
-                        React.DOM.td(null,button
-                        ),
+                        React.DOM.td(null,status),
+                        React.DOM.td(null,button),
                         React.DOM.td(null,''
                         )
                     )
@@ -98,6 +117,11 @@
 
         var panel = React.createClass({
             headers: ['姓名','座號','學號','狀況','行動','簽退欄'],
+            getInitialState: function(){
+                return {
+                    isHidden: true,
+                };
+            },
             render: function(){
                 return (
                     React.DOM.div(
@@ -131,7 +155,7 @@
                             ),
                             React.DOM.tbody(null,
                                 this.props.data.map(function(arrayOfRow,idx){
-                                    return React.createElement(theRow, {data: arrayOfRow});
+                                    return React.createElement(theRow, {initialData: arrayOfRow});
                                 })
                             )
 
