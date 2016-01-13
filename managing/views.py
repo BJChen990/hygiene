@@ -53,9 +53,14 @@ def request_classes(request, grade):
     return JsonResponse(data,safe=False)
 
 def request_students(request, grade, number):
-    the_class = Class.objects.get(grade=grade, number=number)
-    students = the_class.student_set.all()
-    data =serializers.serialize('json', students)
+    cursor = connection.cursor()
+    cursor.execute('''SELECT a.*
+                      FROM
+                        (SELECT * FROM `index_class` WHERE grade = %s AND number = %s) b,
+                        `index_student` a
+                      WHERE a.the_class_id = b.id''' % (grade,number) )
+    students = dictfetchall(cursor)
+    data = json.JSONEncoder().encode(students)
     return JsonResponse(data,safe=False)
 
 def dictfetchall(cursor):
