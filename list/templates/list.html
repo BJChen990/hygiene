@@ -1,7 +1,5 @@
 
 
-    <section id="app"></section>
-
     <header class="theme" id="class_selection" style="padding:20px">
         <form class="form-inline" id="date_picker" method="get" action="/list/">
             <label for="inputDate">選取日期</label>
@@ -20,6 +18,9 @@
             <button type="button" class="btn btn-default" onclick="window.print();">列印</button>
             <button type="button" class="btn btn-default" onclick="move_remainer_to_fail();">歸類未到</button>
         </header>
+
+
+        <section id="app"></section>
 
         {% for class,stu_list in student_by_class.items %}
         <div class="panel panel-default">
@@ -62,49 +63,98 @@
     {% load staticfiles %}
     <script src="{% static 'js/react.min.js' %}"></script>
     <script>
+        const testData = [ ['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3']];
+        const CCClasses = {
+            {% for class,stu_list in student_by_class.items %}
+            '{{ class }}':[
+                {% for stu in stu_list %}
+                ['{{stu.name}}','{{stu.id_in_class}}','{{stu.student_id}}','{{stu.today_status}}'],
+                {% endfor %}
+                ],
+            {% endfor %}
+            };
 
         var theRow = React.createClass({
+            submitByState: function(){
+                console.log('clicked');
+            },
             render: function(){
+                var self = this;
+                var button = (true) ? React.DOM.button({className:'btn btn-success', onClick:self.submitByState},'打卡') :
+                                      React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
                 return (
                     React.DOM.tr(null,
                         this.props.data.map( function(cell,idx){
                             return React.DOM.td(null,cell);
-                        })
+                        }),
+                        React.DOM.td(null,button
+                        ),
+                        React.DOM.td(null,''
+                        )
                     )
                 );
             }
         });
 
-        var table = React.createClass({
+        var panel = React.createClass({
             headers: ['姓名','座號','學號','狀況','行動','簽退欄'],
             render: function(){
                 return (
-                    React.DOM.table(
+                    React.DOM.div(
                         {
-                            className: 'table table-bordered student_list hidden'
+                            className:'panel panel-default',
                         },
-                        React.DOM.thead(null,
-                            React.DOM.tr(null,
-                                this.headers.map( function(v,idx){
-                                    return React.DOM.td(null,v);
-                                })
+                        React.DOM.div(
+                            {
+                                className:'panel-heading'
+                            },
+                            React.DOM.h2(null,
+                                this.props.classString,
+                                React.DOM.button(
+                                    {
+                                        className: 'btn btn-default hide-btn'
+                                    },
+                                    '隱藏/顯示'
+                                )
                             )
                         ),
-                        React.DOM.tbody(null,
-                            this.props.data.map(function(arrayOfRow,idx){
-                                return React.createElement(theRow, {data: arrayOfRow});
-                            })
-                        )
+                        React.DOM.table(
+                            {
+                                className: 'table table-bordered student_list'
+                            },
+                            React.DOM.thead(null,
+                                React.DOM.tr(null,
+                                    this.headers.map( function(v,idx){
+                                        return React.DOM.td(null,v);
+                                    })
+                                )
+                            ),
+                            React.DOM.tbody(null,
+                                this.props.data.map(function(arrayOfRow,idx){
+                                    return React.createElement(theRow, {data: arrayOfRow});
+                                })
+                            )
 
+                        )
                     )
                 );
             }
         });
-        const testData = [ ['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3']];
+
+        var listOfPanel = React.createClass({
+            render: function(){
+
+                var result = [];
+                for( var classKey in this.props.datas){
+                    result.push( React.createElement(panel,{classString:classKey,data:CCClasses[classKey]}));
+                }
+                return React.DOM.div(null,result);
+            }
+        })
 
         React.render(
-            //TODO create today list here
-            React.createElement(table,{data:testData}),
+            React.createElement(listOfPanel,{datas:CCClasses})
+            ,
             document.getElementById('app')
         );
     </script>
