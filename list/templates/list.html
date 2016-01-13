@@ -1,3 +1,7 @@
+
+
+    <section id="app"></section>
+
     <header class="theme" id="class_selection" style="padding:20px">
         <form class="form-inline" id="date_picker" method="get" action="/list/">
             <label for="inputDate">選取日期</label>
@@ -55,6 +59,56 @@
         {% endfor %}
 
     </section>
+    {% load staticfiles %}
+    <script src="{% static 'js/react.min.js' %}"></script>
+    <script>
+
+        var theRow = React.createClass({
+            render: function(){
+                return (
+                    React.DOM.tr(null,
+                        this.props.data.map( function(cell,idx){
+                            return React.DOM.td(null,cell);
+                        })
+                    )
+                );
+            }
+        });
+
+        var table = React.createClass({
+            headers: ['姓名','座號','學號','狀況','行動','簽退欄'],
+            render: function(){
+                return (
+                    React.DOM.table(
+                        {
+                            className: 'table table-bordered student_list hidden'
+                        },
+                        React.DOM.thead(null,
+                            React.DOM.tr(null,
+                                this.headers.map( function(v,idx){
+                                    return React.DOM.td(null,v);
+                                })
+                            )
+                        ),
+                        React.DOM.tbody(null,
+                            this.props.data.map(function(arrayOfRow,idx){
+                                return React.createElement(theRow, {data: arrayOfRow});
+                            })
+                        )
+
+                    )
+                );
+            }
+        });
+        const testData = [ ['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3'],['陳邦菁',1,960106,'3']];
+
+        React.render(
+            //TODO create today list here
+            React.createElement(table,{data:testData}),
+            document.getElementById('app')
+        );
+    </script>
+
     <script>
         $('.hide-btn').click(function(e){
             var table = $($(this).parent().next());
