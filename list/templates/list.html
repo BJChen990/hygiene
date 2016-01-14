@@ -12,88 +12,74 @@
         </form>
     </header>
     <section id="result_students" style="padding-top:20px; padding-bottom:80px; padding-left:15%; padding-right:15%">
-
-        <header class="page-header">
-            <h1>{{the_date}}</h1>
-            <button type="button" class="btn btn-default" onclick="window.print();">列印</button>
-            <button type="button" class="btn btn-default" onclick="move_remainer_to_fail();">歸類未到</button>
-        </header>
-
-
         <section id="app"></section>
-
-        {% for class,stu_list in student_by_class.items %}
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h2>{{ class }}</h2>
-                <button class="btn btn-default hide-btn">隱藏/顯示</button>
-            </div>
-            <!-- Table -->
-            <table class="table table-bordered student_list hidden" style="display:none;">
-                <thead><tr>
-                    <th>姓名</th>
-                    <th>座號</th>
-                    <th>學號</th>
-                    <th>狀況</th>
-                    <th>行動</th>
-                    <th>簽退</th>
-                </tr></thead>
-                {% for stu in stu_list %}
-                    <tr id="stu-{{ stu.student_id }}">
-                        <td>{{ stu.name }}</td>
-                        <td>{{ stu.id_in_class }}</td>
-                        <td>{{ stu.student_id }}</td>
-                        <td></td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-        {% endfor %}
 
     </section>
     {% load staticfiles %}
     <script src="{% static 'js/react.min.js' %}"></script>
     <script>
+        const today = '{{ the_date }}';
         const CCClasses = { {% for class,stu_list in student_by_class.items %}
             '{{ class }}':[{% for stu in stu_list %}['{{stu.name}}','{{stu.id_in_class}}','{{stu.student_id}}','{{stu.today_status}}'],
                 {% endfor %}],{% endfor %}};
 
         var theRow = React.createClass({
-            submitByState: function(){
-                var newData = this.state.data.slice();
-                var newStatus;
-                switch(newData[3]){
-                    case "Full":
-                    case "OneThird":
-                    case "Fail":
+            submitByState: function(e){
+                var self = this;
+                var props = this.props;
+                data_to_send = {student_id: this.state.data[2], csrfmiddlewaretoken:getCookie('csrftoken'), date: today};
+
+                switch(this.state.data[3]){
+                case "Full":
+                case "OneThird":
+                case "Fail":
+                    $.post('/list/cancel/',data_to_send,function(data){
+                        if( !data.success ) return;
+                        var newData = self.state.data.slice();
                         newData[3] = "Pending";
-                        break;
-                    case "Pending":
-                        newData[3] = "Fail";
-                        break;
+                        self.setState({
+                            data: newData
+                        });
+                        props.rowUpdateHandler( props.row, newData );
+                    });
+                    break;
+                case "Pending":
+                    $.post('/list/complete/', data_to_send,function(data){
+                        if( !data.success ) return;
+                        var newData = self.state.data.slice();
+                        newData[3] = "Full";
+                        self.setState({
+                            data: newData
+                        });
+                        props.rowUpdateHandler( props.row, newData );
+                    });
+                    break;
                 }
-                this.setState({
-                    data: newData,
-                });
             },
+
             getInitialState: function() {
                 return {data: this.props.initialData};
             },
+
             render: function(){
                 var self = this;
                 var status;
+                var statusColor;
                 var button;
                 switch(this.state.data[3]){
                     case "Full":
                         status = '已掃完';
+                        statusColor = '#48B948';
                         button = React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
                         break;
                     case "OneThird":
                         status = '已掃完(1/3)';
+                        statusColor = '#48B948';
                         button = React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
                         break;
                     case "Fail":
                         status = '未到';
+                        statusColor = 'red';
                         button = React.DOM.button({className:'btn btn-danger', onClick:self.submitByState},'取消');
                         break;
                     case "Pending":
@@ -102,11 +88,11 @@
                         break;
                 }
                 return (
-                    React.DOM.tr(null,
+                    React.DOM.tr({ "data-row":this.props.row},
                         this.state.data.slice(0,-1).map( function(cell,idx){
                             return React.DOM.td(null,cell);
                         }),
-                        React.DOM.td(null,status),
+                        React.DOM.td({style:{color: statusColor}},status),
                         React.DOM.td(null,button),
                         React.DOM.td(null,''
                         )
@@ -120,9 +106,66 @@
             getInitialState: function(){
                 return {
                     isHidden: true,
+                    shouldChangeDate: false
                 };
             },
+            rowUpdated: function(row,data){
+                var props = this.props;
+                props.data[row] = data;
+                props.dataUpdateHandler(props.classString,props.data)
+            },
+            render_table: function(){
+                if( this.state.isHidden ) return;
+                var self=this;
+                return (
+                    React.DOM.table(
+                        {
+                            className: 'table table-bordered student_list'
+                        },
+                        React.DOM.thead(null,
+                            React.DOM.tr(null,
+                                this.headers.map( function(v,idx){
+                                    return React.DOM.td(null,v);
+                                })
+                            )
+                        ),
+                        React.DOM.tbody(null,
+                            this.props.data.map(function(arrayOfRow,idx){
+                                return React.createElement(theRow, {initialData: arrayOfRow, row: idx, rowUpdateHandler: self.rowUpdated});
+                            })
+                        )
+
+                    )
+                );
+            },
+            toggleChangeDate: function(){
+                var state = this.state;
+                this.setState({
+                    isHidden: state.isHidden,
+                    shouldChangeDate: !state.shouldChangeDate
+                });
+            },
+            toggleHide: function(){
+                var state = this.state;
+                this.setState({
+                    isHidden: !state.isHidden,
+                    shouldChangeDate: state.shouldChangeDate
+                });
+            },
             render: function(){
+                var datePicker = null;
+                if( this.state.shouldChangeDate ){
+                    datePicker = React.DOM.form(
+                        { action: '/managing/change_date/' },
+                        React.DOM.input(
+                            { type:"date", }
+                        ),
+                        React.DOM.input(
+                            { type:"submit" }
+                        )
+                    );
+                }
+
                 return (
                     React.DOM.div(
                         {
@@ -136,43 +179,68 @@
                                 this.props.classString,
                                 React.DOM.button(
                                     {
-                                        className: 'btn btn-default hide-btn'
+                                        className: 'btn btn-default',
+                                        onClick: this.toggleHide
                                     },
                                     '隱藏/顯示'
-                                )
+                                ),
+                                React.DOM.button(
+                                    {
+                                        className: 'btn btn-default',
+                                        onClick: this.toggleChangeDate
+                                    },
+                                    '全班更改日期'
+                                ),
+                                datePicker
                             )
                         ),
-                        React.DOM.table(
-                            {
-                                className: 'table table-bordered student_list'
-                            },
-                            React.DOM.thead(null,
-                                React.DOM.tr(null,
-                                    this.headers.map( function(v,idx){
-                                        return React.DOM.td(null,v);
-                                    })
-                                )
-                            ),
-                            React.DOM.tbody(null,
-                                this.props.data.map(function(arrayOfRow,idx){
-                                    return React.createElement(theRow, {initialData: arrayOfRow});
-                                })
-                            )
-
-                        )
+                        this.render_table()
                     )
                 );
             }
         });
 
         var listOfPanel = React.createClass({
-            render: function(){
+            updateHandler: function(className, data){
+                this.props.datas[className] = data;
+            },
+            tagAllAsFail: function(){
+                var self = this;
+                var idToTag = [];
+                var keyArray = this.props.datas;
+                for( var classKey in keyArray){
+                    var listInClass = keyArray[classKey];
+                    listInClass.map(function(row,idx){
+                        if( row[3] == "Pending" ){
+                            idToTag.push(row[2]);
+                            row[3] = "Fail";
+                        }
+                    });
+                }
 
+                var data_to_send = {student_ids: JSON.stringify(idToTag), csrfmiddlewaretoken:getCookie('csrftoken'), date: today };
+
+                $.post('/list/fail_the_rest/',data_to_send,function(data){
+                    if( data.success){
+                        self.forceUpdate();
+                    }
+                });
+            },
+            render: function(){
                 var result = [];
                 for( var classKey in this.props.datas){
-                    result.push( React.createElement(panel,{classString:classKey,data:CCClasses[classKey]}));
+                    result.push( React.createElement(panel,{classString:classKey,data:CCClasses[classKey],dataUpdateHandler: this.updateHandler}));
                 }
-                return React.DOM.div(null,result);
+                return React.DOM.div(null,
+                    React.DOM.header(
+                        {className:'page-header'
+                        },
+                        React.DOM.h1(null,today),
+                        React.DOM.button({className:'btn btn-default', onClick: window.print },'列印'),
+                        React.DOM.button({className:'btn btn-default', onClick: this.tagAllAsFail },'歸類未到')
+                    )
+                    ,result
+                );
             }
         })
 
@@ -184,85 +252,6 @@
     </script>
 
     <script>
-        $('.hide-btn').click(function(e){
-            var table = $($(this).parent().next());
-            if( table.hasClass('hidden') ){
-                table.show();
-                table.removeClass('hidden');
-            }else{
-                table.hide();
-                table.addClass('hidden');
-            }
-        });
-
-        $('.student_list').click(function(e){
-            var target = $(e.target)
-            var stu_id = target.data('student-id');
-            var type = target.attr('data-type');
-            var data_to_send = {student_id: stu_id,
-                                csrfmiddlewaretoken:getCookie('csrftoken'),
-                                date: '{{ the_date }}'};
-
-            if (type == 'Finish'){
-                $.post('/list/complete/', data_to_send,function(data){
-                    if (data.success){
-                        var local_target = target;
-                        var status = $(target.parent().prev());
-                        local_target.hide();
-                        status.hide();
-
-                        status.text('已掃完')
-                        local_target.addClass('btn-danger');
-                        local_target.removeClass('btn-success');
-                        local_target.attr('data-type','Cancel');
-                        local_target.text('取消');
-
-                        status.show()
-                        local_target.show();
-                    }
-                });
-            }else if (type == 'Cancel'){
-                $.post('/list/cancel/',data_to_send,function(data){
-                    if (data.success){
-                        var local_target = target;
-                        var status = $(target.parent().prev());
-                        local_target.hide();
-                        status.hide();
-
-                        status.text('未打掃')
-
-                        local_target.removeClass('btn-danger');
-                        local_target.addClass('btn-success');
-                        local_target.text('打卡');
-                        local_target.attr('data-type','Finish');
-
-                        local_target.show();
-                        status.show()
-                    }
-                });
-            }
-        });
-
-        function move_remainer_to_fail(){
-            var stu_ids = [];
-            var candidate = $('button[data-type="Finish"]');
-            candidate.each(function(i,v){
-                var button = $(v);
-                stu_ids.push( button.data('student-id') );
-            });
-            var data_to_send = {student_ids: JSON.stringify(stu_ids),
-                                csrfmiddlewaretoken:getCookie('csrftoken'),
-                                date: '{{ the_date }}'};
-
-            $.post('/list/fail_the_rest/',data_to_send,function(data){
-                if( data.success){
-
-                    candidate.parent().prev().text('未到');
-                    candidate.remove();
-                }
-            });
-        }
-
         function getCookie(name) {
             var cookieValue = null;
             if (document.cookie && document.cookie != '') {
